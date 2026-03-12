@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_alarms">
+
+    <!-- Alarms -->
+    <fragment
+        android:id="@+id/nav_alarms"
+        android:name="com.smartalarm.app.ui.alarm.AlarmsFragment"
+        android:label="@string/nav_alarms"
+        tools:layout="@layout/fragment_alarms">
+
+        <action
+            android:id="@+id/action_alarms_to_editAlarm"
+            app:destination="@id/editAlarmFragment" />
+
+        <action
+            android:id="@+id/action_alarms_to_editAlarm_with_id"
+            app:destination="@id/editAlarmFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editAlarmFragment"
+        android:name="com.smartalarm.app.ui.alarm.EditAlarmFragment"
+        android:label="@string/edit_alarm_title"
+        tools:layout="@layout/fragment_edit_alarm">
+
+        <argument
+            android:name="alarmId"
+            app:argType="long"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <!-- Work Schedule -->
+    <fragment
+        android:id="@+id/nav_schedule"
+        android:name="com.smartalarm.app.ui.schedule.WorkScheduleFragment"
+        android:label="@string/nav_schedule"
+        tools:layout="@layout/fragment_work_schedule">
+
+        <action
+            android:id="@+id/action_schedule_to_editSchedule"
+            app:destination="@id/editScheduleFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editScheduleFragment"
+        android:name="com.smartalarm.app.ui.schedule.EditScheduleFragment"
+        android:label="@string/edit_schedule_title"
+        tools:layout="@layout/fragment_edit_schedule">
+
+        <argument
+            android:name="scheduleId"
+            app:argType="long"
+            android:defaultValue="-1" />
+    </fragment>
+
+    <!-- Holidays -->
+    <fragment
+        android:id="@+id/nav_holidays"
+        android:name="com.smartalarm.app.ui.holiday.HolidaysFragment"
+        android:label="@string/nav_holidays"
+        tools:layout="@layout/fragment_holidays" />
+
+    <!-- Locations -->
+    <fragment
+        android:id="@+id/nav_locations"
+        android:name="com.smartalarm.app.ui.location.LocationsFragment"
+        android:label="@string/nav_locations"
+        tools:layout="@layout/fragment_locations" />
+
+</navigation>

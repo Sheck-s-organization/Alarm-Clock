@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Time Picker -->
+        <TimePicker
+            android:id="@+id/time_picker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:timePickerMode="clock" />
+
+        <!-- Label -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+            android:hint="@string/alarm_label_hint">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:maxLines="1" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Alarm Type Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/alarm_type_heading"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp" />
+
+        <RadioGroup
+            android:id="@+id/radio_group_alarm_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radio_standard"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/alarm_type_standard" />
+
+            <RadioButton
+                android:id="@+id/radio_work_schedule"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/alarm_type_work_schedule" />
+
+            <RadioButton
+                android:id="@+id/radio_time_of_month"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/alarm_type_time_of_month" />
+
+            <RadioButton
+                android:id="@+id/radio_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/alarm_type_location" />
+
+            <RadioButton
+                android:id="@+id/radio_charging"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/alarm_type_charging" />
+
+        </RadioGroup>
+
+        <!-- Work Schedule smart section -->
+        <LinearLayout
+            android:id="@+id/section_work_schedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/bg_section_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_work_schedule"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_work_schedule_desc"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Time of Month smart section -->
+        <LinearLayout
+            android:id="@+id/section_time_of_month"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/bg_section_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_time_of_month"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_time_of_month_desc"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Location smart section -->
+        <LinearLayout
+            android:id="@+id/section_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/bg_section_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_location"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_location_desc"
+                android:textSize="12sp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- Charging requirement -->
+        <LinearLayout
+            android:id="@+id/section_charging"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:background="@drawable/bg_section_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/section_charging"
+                android:textStyle="bold" />
+
+            <Spinner
+                android:id="@+id/spinner_charging"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <!-- Repeat Days -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/repeat_days_heading"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ToggleButton android:id="@+id/toggle_monday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="M" android:textOff="M" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_tuesday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="T" android:textOff="T" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_wednesday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="W" android:textOff="W" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_thursday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="T" android:textOff="T" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_friday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="F" android:textOff="F" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_saturday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="S" android:textOff="S" android:textSize="12sp" />
+            <ToggleButton android:id="@+id/toggle_sunday"
+                android:layout_width="0dp" android:layout_height="36dp" android:layout_weight="1"
+                android:textOn="S" android:textOff="S" android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <!-- Vibrate switch -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_vibrate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/vibrate"
+            android:checked="true"
+            android:layout_marginTop="16dp" />
+
+        <!-- Volume -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/volume_heading"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
+
+        <SeekBar
+            android:id="@+id/seek_volume"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="80"
+            android:layout_marginTop="4dp" />
+
+        <!-- Save button (also in toolbar menu) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/action_save"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+    </LinearLayout>
+
+</ScrollView>

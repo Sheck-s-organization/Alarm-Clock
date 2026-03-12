@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Smart Alarm Clock</string>
+
+    <!-- Navigation -->
+    <string name="nav_alarms">Alarms</string>
+    <string name="nav_schedule">Schedule</string>
+    <string name="nav_holidays">Holidays</string>
+    <string name="nav_locations">Locations</string>
+
+    <!-- Alarms screen -->
+    <string name="no_alarms_yet">No alarms yet.\nTap + to add one.</string>
+    <string name="add_alarm">Add alarm</string>
+    <string name="alarm_label_default">Alarm</string>
+    <string name="alarm_label_hint">Label (optional)</string>
+    <string name="alarm_firing_tap_to_dismiss">Tap to dismiss or snooze</string>
+    <string name="edit_alarm_title">Edit Alarm</string>
+
+    <!-- Alarm types -->
+    <string name="alarm_type_heading">Alarm Type</string>
+    <string name="alarm_type_standard">Standard</string>
+    <string name="alarm_type_work_schedule">Work Schedule</string>
+    <string name="alarm_type_time_of_month">Time of Month</string>
+    <string name="alarm_type_location">Location-based</string>
+    <string name="alarm_type_charging">Charging-based</string>
+
+    <!-- Smart sections -->
+    <string name="section_work_schedule">Work Schedule Settings</string>
+    <string name="section_work_schedule_desc">This alarm fires only on your configured work days, automatically skipping holidays.</string>
+    <string name="section_time_of_month">Month Period Settings</string>
+    <string name="section_time_of_month_desc">Configure which days of the month this alarm should fire (e.g., first week, last week).</string>
+    <string name="section_location">Location Settings</string>
+    <string name="section_location_desc">Alarm fires based on which saved location you are at on a given day.</string>
+    <string name="section_charging">Charging Requirement</string>
+
+    <!-- Repeat days -->
+    <string name="repeat_days_heading">Repeat Days</string>
+    <string name="vibrate">Vibrate</string>
+    <string name="volume_heading">Volume</string>
+
+    <!-- Actions -->
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_snooze">Snooze</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="snooze_info_format">Snooze %1$d min (%2$d/%3$d)</string>
+
+    <!-- Work Schedule screen -->
+    <string name="no_schedules_yet">No work schedules yet.\nTap + to create one.</string>
+    <string name="add_schedule">Add schedule</string>
+    <string name="edit_schedule_title">Edit Work Schedule</string>
+    <string name="delete_schedule_title">Delete Schedule</string>
+    <string name="delete_schedule_message">Delete this work schedule? Linked alarms will be unlinked.</string>
+
+    <!-- Holidays screen -->
+    <string name="no_holidays_yet">No holidays added.\nTap + to add days off.</string>
+    <string name="add_holiday">Add holiday</string>
+    <string name="add_holiday_title">Add Time Off</string>
+    <string name="holiday_type_single_day">Single day off</string>
+    <string name="holiday_type_annual">Annual holiday</string>
+    <string name="holiday_type_vacation">Vacation range</string>
+    <string name="pick_day_off">Select day off</string>
+    <string name="pick_vacation_range">Select vacation range</string>
+    <string name="delete_holiday_title">Delete Holiday</string>
+    <string name="delete_holiday_message">Delete \"%1$s\"?</string>
+    <string name="action_import_us_holidays">Import US Holidays</string>
+
+    <!-- Locations screen -->
+    <string name="no_locations_yet">No saved locations.\nTap + to add one.</string>
+    <string name="add_location">Add location</string>
+    <string name="current_location_heading">Current Location</string>
+    <string name="current_location_format">%.5f, %.5f</string>
+    <string name="location_unknown">Unknown — grant location permission</string>
+    <string name="save_current_location">Use current location</string>
+    <string name="name_this_location">Name this location</string>
+    <string name="location_name_hint">e.g. Home, Office, Gym</string>
+    <string name="location_permission_denied">Location permission required for this feature.</string>
+    <string name="delete_location_title">Delete Location</string>
+    <string name="delete_location_message">Delete \"%1$s\"?</string>
+    <string name="delete">Delete</string>
+
+    <!-- Edit Schedule -->
+    <string name="schedule_name_hint">Schedule name</string>
+    <string name="schedule_type_fixed">Fixed Days</string>
+    <string name="schedule_type_rotating">Rotating Shift</string>
+    <string name="work_days_heading">Work Days</string>
+    <string name="default_alarm_time">Default Alarm Time</string>
+    <string name="monthly_override_info">Tip: You can configure time-of-month overrides from the work schedule alarm settings.</string>
+    <string name="rotating_schedule_info">Rotating schedules (e.g., 4-on-4-off) are configured by setting the cycle pattern and anchor date.</string>
+
+</resources>

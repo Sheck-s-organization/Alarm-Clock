@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/alarm_firing_background"
+    android:padding="24dp">
+
+    <!-- Alarm icon / animation -->
+    <ImageView
+        android:id="@+id/ivAlarmIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_alarm_large"
+        android:tint="@color/alarm_firing_accent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintBottom_toTopOf="@id/tvFiringTime"
+        android:layout_marginTop="64dp" />
+
+    <!-- Current time -->
+    <TextView
+        android:id="@+id/tvFiringTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="72sp"
+        android:textStyle="bold"
+        android:textColor="@color/alarm_firing_text"
+        android:fontFamily="@font/roboto_thin"
+        app:layout_constraintTop_toBottomOf="@id/ivAlarmIcon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvAlarmLabel"
+        android:layout_marginTop="16dp"
+        android:text="07:30" />
+
+    <!-- Alarm label -->
+    <TextView
+        android:id="@+id/tvAlarmLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/alarm_firing_text_secondary"
+        app:layout_constraintTop_toBottomOf="@id/tvFiringTime"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvSnoozeInfo"
+        android:layout_marginTop="8dp"
+        android:text="@string/alarm_label_default" />
+
+    <!-- Snooze info -->
+    <TextView
+        android:id="@+id/tvSnoozeInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="@color/alarm_firing_text_secondary"
+        android:alpha="0.7"
+        app:layout_constraintTop_toBottomOf="@id/tvAlarmLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnSnooze"
+        android:layout_marginTop="8dp"
+        android:text="Snooze 9 min (0/3)" />
+
+    <!-- Snooze button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSnooze"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="@string/action_snooze"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/btnDismiss"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <!-- Dismiss button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnDismiss"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="@string/action_dismiss"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

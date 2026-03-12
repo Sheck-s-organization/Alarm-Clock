@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_alarms"
+        android:icon="@drawable/ic_alarm"
+        android:title="@string/nav_alarms" />
+
+    <item
+        android:id="@+id/nav_schedule"
+        android:icon="@drawable/ic_schedule"
+        android:title="@string/nav_schedule" />
+
+    <item
+        android:id="@+id/nav_holidays"
+        android:icon="@drawable/ic_event"
+        android:title="@string/nav_holidays" />
+
+    <item
+        android:id="@+id/nav_locations"
+        android:icon="@drawable/ic_location_pin"
+        android:title="@string/nav_locations" />
+
+</menu>

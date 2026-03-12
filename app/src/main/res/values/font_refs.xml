@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Font references. The actual font file (roboto_thin.ttf) would be placed in
+     res/font/roboto_thin.ttf. For distribution, it can be downloaded from Google Fonts.
+     Reference in activity_alarm_firing.xml via @font/roboto_thin. -->
+<resources />
