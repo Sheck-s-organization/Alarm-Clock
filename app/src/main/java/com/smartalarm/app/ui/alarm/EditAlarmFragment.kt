@@ -177,8 +177,11 @@ class EditAlarmFragment : Fragment() {
             repeatDays = getSelectedDays()
         )
 
-        alarmViewModel.saveAlarm(alarm)
-        findNavController().popBackStack()
+        lifecycleScope.launch {
+            val repo = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication).alarmRepository
+            if (alarm.id == 0L) repo.insertAlarm(alarm) else repo.updateAlarm(alarm)
+            findNavController().popBackStack()
+        }
     }
 
     private fun getSelectedDays(): Set<Int> {

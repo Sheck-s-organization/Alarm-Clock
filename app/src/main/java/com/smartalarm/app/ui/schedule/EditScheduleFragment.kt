@@ -121,8 +121,11 @@ class EditScheduleFragment : Fragment() {
             workDays = workDays
         )
 
-        viewModel.saveSchedule(schedule)
-        findNavController().popBackStack()
+        lifecycleScope.launch {
+            val repo = (requireActivity().application as SmartAlarmApplication).workScheduleRepository
+            if (schedule.id == 0L) repo.insertSchedule(schedule) else repo.updateSchedule(schedule)
+            findNavController().popBackStack()
+        }
     }
 
     override fun onDestroyView() {
