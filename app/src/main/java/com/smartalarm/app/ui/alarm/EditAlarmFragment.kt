@@ -14,7 +14,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.smartalarm.app.R
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.entities.AlarmType
@@ -30,7 +29,6 @@ class EditAlarmFragment : Fragment() {
     private var _binding: FragmentEditAlarmBinding? = null
     private val binding get() = _binding!!
 
-    private val args: EditAlarmFragmentArgs by navArgs()
     private val alarmViewModel: AlarmViewModel by viewModels()
     private val scheduleViewModel: WorkScheduleViewModel by viewModels()
 
@@ -52,7 +50,8 @@ class EditAlarmFragment : Fragment() {
         setupChargingSpinner()
 
         // Load existing alarm if editing
-        if (args.alarmId != -1L) {
+        val alarmId = arguments?.getLong("alarmId", -1L) ?: -1L
+        if (alarmId != -1L) {
             lifecycleScope.launch {
                 val alarm = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication)
                     .alarmRepository.getAlarmById(args.alarmId)
@@ -94,8 +93,8 @@ class EditAlarmFragment : Fragment() {
     }
 
     private fun setupAlarmTypePicker() {
-        binding.radioGroupAlarmType.check(R.id.radioStandard)
-        updateSmartSectionsVisibility(R.id.radioStandard)
+        binding.radioGroupAlarmType.check(R.id.radio_standard)
+        updateSmartSectionsVisibility(R.id.radio_standard)
     }
 
     private fun setupChargingSpinner() {
@@ -112,13 +111,13 @@ class EditAlarmFragment : Fragment() {
 
     private fun updateSmartSectionsVisibility(checkedId: Int) {
         binding.sectionWorkSchedule.visibility =
-            if (checkedId == R.id.radioWorkSchedule) View.VISIBLE else View.GONE
+            if (checkedId == R.id.radio_work_schedule) View.VISIBLE else View.GONE
         binding.sectionTimeOfMonth.visibility =
-            if (checkedId == R.id.radioTimeOfMonth) View.VISIBLE else View.GONE
+            if (checkedId == R.id.radio_time_of_month) View.VISIBLE else View.GONE
         binding.sectionLocation.visibility =
-            if (checkedId == R.id.radioLocation) View.VISIBLE else View.GONE
+            if (checkedId == R.id.radio_location) View.VISIBLE else View.GONE
         binding.sectionCharging.visibility =
-            if (checkedId == R.id.radioCharging || checkedId == R.id.radioWorkSchedule)
+            if (checkedId == R.id.radio_charging || checkedId == R.id.radio_work_schedule)
                 View.VISIBLE else View.GONE
     }
 
@@ -130,11 +129,11 @@ class EditAlarmFragment : Fragment() {
         binding.seekVolume.progress = alarm.volumePercent
 
         val radioId = when (alarm.alarmType) {
-            AlarmType.STANDARD -> R.id.radioStandard
-            AlarmType.WORK_SCHEDULE -> R.id.radioWorkSchedule
-            AlarmType.TIME_OF_MONTH -> R.id.radioTimeOfMonth
-            AlarmType.LOCATION -> R.id.radioLocation
-            AlarmType.CHARGING -> R.id.radioCharging
+            AlarmType.STANDARD -> R.id.radio_standard
+            AlarmType.WORK_SCHEDULE -> R.id.radio_work_schedule
+            AlarmType.TIME_OF_MONTH -> R.id.radio_time_of_month
+            AlarmType.LOCATION -> R.id.radio_location
+            AlarmType.CHARGING -> R.id.radio_charging
         }
         binding.radioGroupAlarmType.check(radioId)
 
@@ -154,10 +153,10 @@ class EditAlarmFragment : Fragment() {
         val volume = binding.seekVolume.progress
 
         val alarmType = when (binding.radioGroupAlarmType.checkedRadioButtonId) {
-            R.id.radioWorkSchedule -> AlarmType.WORK_SCHEDULE
-            R.id.radioTimeOfMonth -> AlarmType.TIME_OF_MONTH
-            R.id.radioLocation -> AlarmType.LOCATION
-            R.id.radioCharging -> AlarmType.CHARGING
+            R.id.radio_work_schedule -> AlarmType.WORK_SCHEDULE
+            R.id.radio_time_of_month -> AlarmType.TIME_OF_MONTH
+            R.id.radio_location -> AlarmType.LOCATION
+            R.id.radio_charging -> AlarmType.CHARGING
             else -> AlarmType.STANDARD
         }
 

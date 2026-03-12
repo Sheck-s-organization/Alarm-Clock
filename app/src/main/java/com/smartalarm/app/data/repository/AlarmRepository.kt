@@ -8,8 +8,6 @@ import com.smartalarm.app.data.entities.AlarmLog
 import com.smartalarm.app.data.entities.AlarmType
 import com.smartalarm.app.data.entities.SkipReason
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 class AlarmRepository(
     private val alarmDao: AlarmDao,

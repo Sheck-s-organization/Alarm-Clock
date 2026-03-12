@@ -37,9 +37,8 @@ class WorkScheduleFragment : Fragment() {
         adapter = WorkScheduleAdapter(
             onSetActive = { schedule -> viewModel.setActiveSchedule(schedule.id) },
             onEdit = { schedule ->
-                val action = WorkScheduleFragmentDirections
-                    .actionScheduleToEditSchedule(schedule.id)
-                findNavController().navigate(action)
+                val bundle = android.os.Bundle().apply { putLong("scheduleId", schedule.id) }
+                findNavController().navigate(R.id.editScheduleFragment, bundle)
             },
             onDelete = { schedule ->
                 MaterialAlertDialogBuilder(requireContext())

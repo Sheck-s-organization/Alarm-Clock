@@ -17,7 +17,7 @@ import com.smartalarm.app.data.entities.*
         AlarmLog::class
     ],
     version = 1,
-    exportSchema = true
+    exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class SmartAlarmDatabase : RoomDatabase() {

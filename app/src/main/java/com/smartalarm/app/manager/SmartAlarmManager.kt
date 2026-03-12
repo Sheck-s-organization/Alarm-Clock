@@ -230,14 +230,16 @@ class SmartAlarmManager(
 
             if (!isHoliday && isWorkDay(schedule, cal)) {
                 // Apply time-of-month or day-of-week overrides
-                val override = getMonthlyOverride(schedule.monthlyOverridesJson, day)
-                    ?: getDayOverride(
-                        schedule.dayOverridesJson,
-                        toIsoDayOfWeek(cal.get(Calendar.DAY_OF_WEEK))
-                    )
+                val monthOverride = getMonthlyOverride(schedule.monthlyOverridesJson, day)
+                val dayOverride = getDayOverride(
+                    schedule.dayOverridesJson,
+                    toIsoDayOfWeek(cal.get(Calendar.DAY_OF_WEEK))
+                )
+                val overrideHour = monthOverride?.hour ?: dayOverride?.hour
+                val overrideMinute = monthOverride?.minute ?: dayOverride?.minute
                 val triggerCal = cal.clone() as Calendar
-                triggerCal.set(Calendar.HOUR_OF_DAY, override?.hour ?: alarm.hour)
-                triggerCal.set(Calendar.MINUTE, override?.minute ?: alarm.minute)
+                triggerCal.set(Calendar.HOUR_OF_DAY, overrideHour ?: alarm.hour)
+                triggerCal.set(Calendar.MINUTE, overrideMinute ?: alarm.minute)
                 triggerCal.set(Calendar.SECOND, 0)
                 triggerCal.set(Calendar.MILLISECOND, 0)
                 return triggerCal.timeInMillis

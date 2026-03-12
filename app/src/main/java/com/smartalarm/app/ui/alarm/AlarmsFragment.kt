@@ -36,8 +36,8 @@ class AlarmsFragment : Fragment() {
         adapter = AlarmAdapter(
             onToggle = { alarm, enabled -> viewModel.toggleAlarm(alarm.id, enabled) },
             onEdit = { alarm ->
-                val action = AlarmsFragmentDirections.actionAlarmsToEditAlarm(alarm.id)
-                findNavController().navigate(action)
+                val bundle = android.os.Bundle().apply { putLong("alarmId", alarm.id) }
+                findNavController().navigate(R.id.editAlarmFragment, bundle)
             },
             onDelete = { alarm ->
                 viewModel.deleteAlarm(alarm)

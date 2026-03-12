@@ -14,8 +14,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import com.google.gson.Gson
 import com.smartalarm.app.R
 import com.smartalarm.app.SmartAlarmApplication
 import com.smartalarm.app.data.entities.ScheduleType
@@ -29,7 +27,6 @@ class EditScheduleFragment : Fragment() {
     private var _binding: FragmentEditScheduleBinding? = null
     private val binding get() = _binding!!
 
-    private val args: EditScheduleFragmentArgs by navArgs()
     private val viewModel: WorkScheduleViewModel by viewModels()
     private var existingSchedule: WorkSchedule? = null
 
@@ -47,10 +44,11 @@ class EditScheduleFragment : Fragment() {
         setupMenu()
         setupScheduleTypeTabs()
 
-        if (args.scheduleId != -1L) {
+        val scheduleId = arguments?.getLong("scheduleId", -1L) ?: -1L
+        if (scheduleId != -1L) {
             lifecycleScope.launch {
                 val schedule = (requireActivity().application as SmartAlarmApplication)
-                    .workScheduleRepository.getScheduleById(args.scheduleId)
+                    .workScheduleRepository.getScheduleById(scheduleId)
                 schedule?.let { populateFields(it) }
                 existingSchedule = schedule
             }
