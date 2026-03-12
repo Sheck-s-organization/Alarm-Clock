@@ -72,25 +72,39 @@
 
                 <ToggleButton android:id="@+id/toggle_mon"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="M" android:textOff="M" android:checked="true" />
+                    android:textOn="M" android:textOff="M" android:checked="true"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_tue"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="T" android:textOff="T" android:checked="true" />
+                    android:textOn="T" android:textOff="T" android:checked="true"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_wed"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="W" android:textOff="W" android:checked="true" />
+                    android:textOn="W" android:textOff="W" android:checked="true"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_thu"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="T" android:textOff="T" android:checked="true" />
+                    android:textOn="T" android:textOff="T" android:checked="true"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_fri"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="F" android:textOff="F" android:checked="true" />
+                    android:textOn="F" android:textOff="F" android:checked="true"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_sat"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="S" android:textOff="S" />
+                    android:textOn="S" android:textOff="S"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
                 <ToggleButton android:id="@+id/toggle_sun"
                     android:layout_width="0dp" android:layout_height="40dp" android:layout_weight="1"
-                    android:textOn="S" android:textOff="S" />
+                    android:textOn="S" android:textOff="S"
+                    android:background="@drawable/bg_day_toggle"
+                    android:textColor="@color/day_toggle_text_color" />
 
             </LinearLayout>
 
