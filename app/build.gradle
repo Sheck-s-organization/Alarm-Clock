@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
-    coreLibraryDesugaring 'com.android.tools.build:desugaring:2.0.4'
+    coreLibraryDesugaring 'com.android.tools.build:desugar_jdk_libs:2.0.4'
 
     // Lifecycle / ViewModel
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
