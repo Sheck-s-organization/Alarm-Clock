@@ -48,6 +48,7 @@ class EditAlarmFragment : Fragment() {
         setupMenu()
         setupAlarmTypePicker()
         setupChargingSpinner()
+        binding.btnSave.setOnClickListener { saveAlarm() }
 
         // Load existing alarm if editing
         val alarmId = arguments?.getLong("alarmId", -1L) ?: -1L

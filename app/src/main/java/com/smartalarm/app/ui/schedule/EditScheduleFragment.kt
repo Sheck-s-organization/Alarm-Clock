@@ -43,6 +43,7 @@ class EditScheduleFragment : Fragment() {
 
         setupMenu()
         setupScheduleTypeTabs()
+        binding.btnSaveSchedule.setOnClickListener { saveSchedule() }
 
         val scheduleId = arguments?.getLong("scheduleId", -1L) ?: -1L
         if (scheduleId != -1L) {
