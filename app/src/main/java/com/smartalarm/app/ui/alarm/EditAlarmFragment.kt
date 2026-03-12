@@ -54,7 +54,7 @@ class EditAlarmFragment : Fragment() {
         if (alarmId != -1L) {
             lifecycleScope.launch {
                 val alarm = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication)
-                    .alarmRepository.getAlarmById(args.alarmId)
+                    .alarmRepository.getAlarmById(alarmId)
                 alarm?.let { populateFields(it) }
                 existingAlarm = alarm
             }
