@@ -153,23 +153,6 @@
 
         </LinearLayout>
 
-        <!-- Default Alarm Time -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/default_alarm_time"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="8dp" />
-
-        <TimePicker
-            android:id="@+id/time_picker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:timePickerMode="clock" />
-
         <!-- Save button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_save_schedule"

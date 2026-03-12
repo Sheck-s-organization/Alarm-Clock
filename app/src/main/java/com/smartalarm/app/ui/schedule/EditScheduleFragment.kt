@@ -86,8 +86,6 @@ class EditScheduleFragment : Fragment() {
 
     private fun populateFields(schedule: WorkSchedule) {
         binding.etScheduleName.setText(schedule.name)
-        binding.timePicker.hour = schedule.alarmHour
-        binding.timePicker.minute = schedule.alarmMinute
 
         if (schedule.scheduleType == ScheduleType.ROTATING) {
             binding.tabLayoutScheduleType.getTabAt(1)?.select()
@@ -105,8 +103,6 @@ class EditScheduleFragment : Fragment() {
 
     private fun saveSchedule() {
         val name = binding.etScheduleName.text.toString().trim().ifBlank { "Work Schedule" }
-        val hour = binding.timePicker.hour
-        val minute = binding.timePicker.minute
         val isRotating = binding.tabLayoutScheduleType.selectedTabPosition == 1
 
         val workDays = mutableSetOf<Int>().apply {
@@ -119,14 +115,8 @@ class EditScheduleFragment : Fragment() {
             if (binding.toggleSun.isChecked) add(7)
         }
 
-        val schedule = (existingSchedule ?: WorkSchedule(
+        val schedule = (existingSchedule ?: WorkSchedule(name = name)).copy(
             name = name,
-            alarmHour = hour,
-            alarmMinute = minute
-        )).copy(
-            name = name,
-            alarmHour = hour,
-            alarmMinute = minute,
             scheduleType = if (isRotating) ScheduleType.ROTATING else ScheduleType.FIXED_DAYS,
             workDays = workDays
         )
