@@ -70,7 +70,7 @@
     <string name="no_locations_yet">No saved locations.\nTap + to add one.</string>
     <string name="add_location">Add location</string>
     <string name="current_location_heading">Current Location</string>
-    <string name="current_location_format">%.5f, %.5f</string>
+    <string name="current_location_format" formatted="false">%.5f, %.5f</string>
     <string name="location_unknown">Unknown — grant location permission</string>
     <string name="save_current_location">Use current location</string>
     <string name="name_this_location">Name this location</string>
