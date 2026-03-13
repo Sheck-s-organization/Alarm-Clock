@@ -45,6 +45,10 @@ data class Alarm(
     @ColumnInfo(name = "work_schedule_id")
     val workScheduleId: Long? = null,
 
+    // How the work-schedule alarm repeats (only used for WORK_SCHEDULE type)
+    @ColumnInfo(name = "work_schedule_repeat")
+    val workScheduleRepeat: WorkScheduleRepeat = WorkScheduleRepeat.EVERY_WORKDAY,
+
     // ---- Time of Month config ----
     // JSON-serialised list of MonthPeriod objects indicating which parts of the month
     // Example: [{"startDay":1,"endDay":7,"label":"First week"}]
@@ -97,6 +101,12 @@ enum class AlarmType {
     TIME_OF_MONTH,
     LOCATION,
     CHARGING
+}
+
+enum class WorkScheduleRepeat {
+    EVERY_WORKDAY,            // Fires Mon–Fri (excluding holidays)
+    LAST_WORKDAY_OF_WEEK,     // Fires on the last workday of each week (usually Friday)
+    LAST_WORKDAY_OF_MONTH     // Fires on the last workday of each calendar month
 }
 
 enum class ChargingRequirement {

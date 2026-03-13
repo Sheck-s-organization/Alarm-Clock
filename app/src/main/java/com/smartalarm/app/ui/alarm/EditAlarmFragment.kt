@@ -20,6 +20,7 @@ import com.smartalarm.app.R
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.entities.AlarmType
 import com.smartalarm.app.data.entities.ChargingRequirement
+import com.smartalarm.app.data.entities.WorkScheduleRepeat
 import com.smartalarm.app.databinding.FragmentEditAlarmBinding
 import com.smartalarm.app.viewmodel.AlarmViewModel
 import com.smartalarm.app.viewmodel.WorkScheduleViewModel
@@ -117,15 +118,18 @@ class EditAlarmFragment : Fragment() {
     }
 
     private fun updateSmartSectionsVisibility(checkedId: Int) {
-        binding.sectionWorkSchedule.visibility =
-            if (checkedId == R.id.radio_work_schedule) View.VISIBLE else View.GONE
+        val isWorkSchedule = checkedId == R.id.radio_work_schedule
+        binding.sectionWorkSchedule.visibility = if (isWorkSchedule) View.VISIBLE else View.GONE
         binding.sectionTimeOfMonth.visibility =
             if (checkedId == R.id.radio_time_of_month) View.VISIBLE else View.GONE
         binding.sectionLocation.visibility =
             if (checkedId == R.id.radio_location) View.VISIBLE else View.GONE
         binding.sectionCharging.visibility =
-            if (checkedId == R.id.radio_charging || checkedId == R.id.radio_work_schedule)
-                View.VISIBLE else View.GONE
+            if (checkedId == R.id.radio_charging || isWorkSchedule) View.VISIBLE else View.GONE
+        // Work Schedule manages its own repeat logic; hide generic day toggles for it
+        val dayToggleVisibility = if (isWorkSchedule) View.GONE else View.VISIBLE
+        binding.tvRepeatDaysHeading.visibility = dayToggleVisibility
+        binding.layoutDayToggles.visibility = dayToggleVisibility
     }
 
     private fun populateFields(alarm: Alarm) {
@@ -150,6 +154,13 @@ class EditAlarmFragment : Fragment() {
             ChargingRequirement.NOT_CHARGING -> 2
         }
         binding.spinnerCharging.setSelection(chargingIndex)
+
+        val wsRepeatId = when (alarm.workScheduleRepeat) {
+            WorkScheduleRepeat.EVERY_WORKDAY -> R.id.radio_ws_every_workday
+            WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK -> R.id.radio_ws_last_workday_of_week
+            WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH -> R.id.radio_ws_last_workday_of_month
+        }
+        binding.radioGroupWorkScheduleRepeat.check(wsRepeatId)
     }
 
     private fun saveAlarm() {
@@ -173,6 +184,12 @@ class EditAlarmFragment : Fragment() {
             else -> ChargingRequirement.NOT_REQUIRED
         }
 
+        val wsRepeat = when (binding.radioGroupWorkScheduleRepeat.checkedRadioButtonId) {
+            R.id.radio_ws_last_workday_of_week -> WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK
+            R.id.radio_ws_last_workday_of_month -> WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH
+            else -> WorkScheduleRepeat.EVERY_WORKDAY
+        }
+
         val alarm = (existingAlarm ?: Alarm(hour = hour, minute = minute)).copy(
             hour = hour,
             minute = minute,
@@ -181,7 +198,8 @@ class EditAlarmFragment : Fragment() {
             volumePercent = volume,
             alarmType = alarmType,
             chargingRequirement = chargingReq,
-            repeatDays = getSelectedDays()
+            repeatDays = getSelectedDays(),
+            workScheduleRepeat = wsRepeat
         )
 
         lifecycleScope.launch {

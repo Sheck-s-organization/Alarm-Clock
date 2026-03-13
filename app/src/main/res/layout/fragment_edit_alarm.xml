@@ -108,6 +108,41 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_marginTop="4dp" />
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/work_schedule_repeat_heading"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_marginTop="12dp" />
+
+            <RadioGroup
+                android:id="@+id/radio_group_work_schedule_repeat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp">
+
+                <RadioButton
+                    android:id="@+id/radio_ws_every_workday"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/work_schedule_every_workday"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/radio_ws_last_workday_of_week"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/work_schedule_last_workday_of_week" />
+
+                <RadioButton
+                    android:id="@+id/radio_ws_last_workday_of_month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/work_schedule_last_workday_of_month" />
+
+            </RadioGroup>
+
         </LinearLayout>
 
         <!-- Time of Month smart section -->
@@ -191,6 +226,7 @@
 
         <!-- Repeat Days -->
         <TextView
+            android:id="@+id/tv_repeat_days_heading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/repeat_days_heading"
@@ -200,6 +236,7 @@
             android:layout_marginBottom="8dp" />
 
         <LinearLayout
+            android:id="@+id/layout_day_toggles"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
