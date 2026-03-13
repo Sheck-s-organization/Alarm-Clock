@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -50,6 +51,7 @@ class EditAlarmFragment : Fragment() {
         setupAlarmTypePicker()
         setupChargingSpinner()
         binding.btnSave.setOnClickListener { saveAlarm() }
+        binding.btnDelete.setOnClickListener { confirmDeleteAlarm() }
 
         // Load existing alarm if editing
         val alarmId = arguments?.getLong("alarmId", -1L) ?: -1L
@@ -59,6 +61,9 @@ class EditAlarmFragment : Fragment() {
                     .alarmRepository.getAlarmById(alarmId)
                 alarm?.let { populateFields(it) }
                 existingAlarm = alarm
+                if (alarm != null) {
+                    binding.btnDelete.visibility = View.VISIBLE
+                }
             }
         } else {
             // Defaults for new alarm
@@ -200,6 +205,26 @@ class EditAlarmFragment : Fragment() {
         if (binding.toggleSaturday.isChecked) days.add(6)
         if (binding.toggleSunday.isChecked) days.add(7)
         return days
+    }
+
+    private fun confirmDeleteAlarm() {
+        val alarm = existingAlarm ?: return
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.delete_alarm_title)
+            .setMessage(R.string.delete_alarm_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        val repo = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication).alarmRepository
+                        repo.deleteAlarm(alarm)
+                        findNavController().popBackStack()
+                    } catch (e: Exception) {
+                        Snackbar.make(binding.root, "Failed to delete alarm: ${e.message}", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     override fun onDestroyView() {

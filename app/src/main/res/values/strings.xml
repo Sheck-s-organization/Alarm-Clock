@@ -50,6 +50,8 @@
     <string name="no_schedules_yet">No work schedules yet.\nTap + to create one.</string>
     <string name="add_schedule">Add schedule</string>
     <string name="edit_schedule_title">Edit Work Schedule</string>
+    <string name="delete_alarm_title">Delete Alarm</string>
+    <string name="delete_alarm_message">Delete this alarm?</string>
     <string name="delete_schedule_title">Delete Schedule</string>
     <string name="delete_schedule_message">Delete this work schedule? Linked alarms will be unlinked.</string>
 
