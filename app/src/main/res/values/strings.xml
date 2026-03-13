@@ -31,6 +31,7 @@
     <string name="work_schedule_every_workday">Every workday</string>
     <string name="work_schedule_last_workday_of_week">Last workday of the week</string>
     <string name="work_schedule_last_workday_of_month">Last workday of the month</string>
+    <string name="work_schedule_last_workday_of_week_and_month">Last workday of the week &amp; month</string>
     <string name="section_time_of_month">Month Period Settings</string>
     <string name="section_time_of_month_desc">Configure which days of the month this alarm should fire (e.g., first week, last week).</string>
     <string name="section_location">Location Settings</string>

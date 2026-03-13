@@ -104,9 +104,10 @@ enum class AlarmType {
 }
 
 enum class WorkScheduleRepeat {
-    EVERY_WORKDAY,            // Fires Mon–Fri (excluding holidays)
-    LAST_WORKDAY_OF_WEEK,     // Fires on the last workday of each week (usually Friday)
-    LAST_WORKDAY_OF_MONTH     // Fires on the last workday of each calendar month
+    EVERY_WORKDAY,                  // Fires Mon–Fri (excluding holidays)
+    LAST_WORKDAY_OF_WEEK,           // Fires on the last workday of each week (usually Friday)
+    LAST_WORKDAY_OF_MONTH,          // Fires on the last workday of each calendar month
+    LAST_WORKDAY_OF_WEEK_AND_MONTH  // Fires on both the last workday of each week AND month
 }
 
 enum class ChargingRequirement {

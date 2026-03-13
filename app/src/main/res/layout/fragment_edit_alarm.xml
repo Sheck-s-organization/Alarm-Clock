@@ -141,6 +141,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/work_schedule_last_workday_of_month" />
 
+                <RadioButton
+                    android:id="@+id/radio_ws_last_workday_of_week_and_month"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/work_schedule_last_workday_of_week_and_month" />
+
             </RadioGroup>
 
         </LinearLayout>

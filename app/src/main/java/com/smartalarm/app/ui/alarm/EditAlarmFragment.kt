@@ -159,6 +159,7 @@ class EditAlarmFragment : Fragment() {
             WorkScheduleRepeat.EVERY_WORKDAY -> R.id.radio_ws_every_workday
             WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK -> R.id.radio_ws_last_workday_of_week
             WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH -> R.id.radio_ws_last_workday_of_month
+            WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK_AND_MONTH -> R.id.radio_ws_last_workday_of_week_and_month
         }
         binding.radioGroupWorkScheduleRepeat.check(wsRepeatId)
     }
@@ -187,6 +188,7 @@ class EditAlarmFragment : Fragment() {
         val wsRepeat = when (binding.radioGroupWorkScheduleRepeat.checkedRadioButtonId) {
             R.id.radio_ws_last_workday_of_week -> WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK
             R.id.radio_ws_last_workday_of_month -> WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH
+            R.id.radio_ws_last_workday_of_week_and_month -> WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK_AND_MONTH
             else -> WorkScheduleRepeat.EVERY_WORKDAY
         }
 
