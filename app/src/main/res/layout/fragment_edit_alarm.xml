@@ -124,28 +124,32 @@
 
                 <RadioButton
                     android:id="@+id/radio_ws_every_workday"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/work_schedule_every_workday"
+                    android:textColor="?attr/colorOnSurface"
                     android:checked="true" />
 
                 <RadioButton
                     android:id="@+id/radio_ws_last_workday_of_week"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/work_schedule_last_workday_of_week" />
+                    android:text="@string/work_schedule_last_workday_of_week"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <RadioButton
                     android:id="@+id/radio_ws_last_workday_of_month"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/work_schedule_last_workday_of_month" />
+                    android:text="@string/work_schedule_last_workday_of_month"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <RadioButton
                     android:id="@+id/radio_ws_last_workday_of_week_and_month"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/work_schedule_last_workday_of_week_and_month" />
+                    android:text="@string/work_schedule_last_workday_of_week_and_month"
+                    android:textColor="?attr/colorOnSurface" />
 
             </RadioGroup>
 
