@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import com.google.android.material.snackbar.Snackbar
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -179,9 +180,13 @@ class EditAlarmFragment : Fragment() {
         )
 
         lifecycleScope.launch {
-            val repo = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication).alarmRepository
-            if (alarm.id == 0L) repo.insertAlarm(alarm) else repo.updateAlarm(alarm)
-            findNavController().popBackStack()
+            try {
+                val repo = (requireActivity().application as com.smartalarm.app.SmartAlarmApplication).alarmRepository
+                if (alarm.id == 0L) repo.insertAlarm(alarm) else repo.updateAlarm(alarm)
+                findNavController().popBackStack()
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Failed to save alarm: ${e.message}", Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 

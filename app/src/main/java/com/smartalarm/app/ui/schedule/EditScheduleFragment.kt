@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import com.google.android.material.snackbar.Snackbar
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -123,9 +124,13 @@ class EditScheduleFragment : Fragment() {
         )
 
         lifecycleScope.launch {
-            val repo = (requireActivity().application as SmartAlarmApplication).workScheduleRepository
-            if (schedule.id == 0L) repo.insertSchedule(schedule) else repo.updateSchedule(schedule)
-            findNavController().popBackStack()
+            try {
+                val repo = (requireActivity().application as SmartAlarmApplication).workScheduleRepository
+                if (schedule.id == 0L) repo.insertSchedule(schedule) else repo.updateSchedule(schedule)
+                findNavController().popBackStack()
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Failed to save schedule: ${e.message}", Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
