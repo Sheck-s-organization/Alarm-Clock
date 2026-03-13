@@ -106,6 +106,20 @@ class SmartAlarmManager(
                     return@withContext AlarmDecision.Skip(SkipReason.NOT_WORK_DAY)
                 }
 
+                // Work-schedule repeat check
+                val matchesRepeat = when (alarm.workScheduleRepeat) {
+                    WorkScheduleRepeat.EVERY_WORKDAY -> true
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK ->
+                        isLastWorkdayOfWeek(schedule, now)
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH ->
+                        isLastWorkdayOfMonth(schedule, now)
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK_AND_MONTH ->
+                        isLastWorkdayOfWeek(schedule, now) || isLastWorkdayOfMonth(schedule, now)
+                }
+                if (!matchesRepeat) {
+                    return@withContext AlarmDecision.Skip(SkipReason.NOT_WORK_DAY)
+                }
+
                 // Time-of-month override on work schedule
                 val monthOverride = getMonthlyOverride(schedule.monthlyOverridesJson, day)
                 if (monthOverride != null) {
@@ -219,8 +233,13 @@ class SmartAlarmManager(
         val schedule = workScheduleRepository.getScheduleById(scheduleId) ?: return null
 
         val cal = startCal.clone() as Calendar
-        // Search up to 14 days ahead to find the next work day
-        for (i in 0..13) {
+        // For last-workday-of-month variants the next occurrence could be up to ~35 days away
+        val searchDays = when (alarm.workScheduleRepeat) {
+            WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH,
+            WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK_AND_MONTH -> 35
+            else -> 14
+        }
+        for (i in 0 until searchDays) {
             val year = cal.get(Calendar.YEAR)
             val month = cal.get(Calendar.MONTH) + 1
             val day = cal.get(Calendar.DAY_OF_MONTH)
@@ -229,20 +248,32 @@ class SmartAlarmManager(
             val isHoliday = holidays.isNotEmpty()
 
             if (!isHoliday && isWorkDay(schedule, cal)) {
-                // Apply time-of-month or day-of-week overrides
-                val monthOverride = getMonthlyOverride(schedule.monthlyOverridesJson, day)
-                val dayOverride = getDayOverride(
-                    schedule.dayOverridesJson,
-                    toIsoDayOfWeek(cal.get(Calendar.DAY_OF_WEEK))
-                )
-                val overrideHour = monthOverride?.hour ?: dayOverride?.hour
-                val overrideMinute = monthOverride?.minute ?: dayOverride?.minute
-                val triggerCal = cal.clone() as Calendar
-                triggerCal.set(Calendar.HOUR_OF_DAY, overrideHour ?: alarm.hour)
-                triggerCal.set(Calendar.MINUTE, overrideMinute ?: alarm.minute)
-                triggerCal.set(Calendar.SECOND, 0)
-                triggerCal.set(Calendar.MILLISECOND, 0)
-                return triggerCal.timeInMillis
+                val matchesRepeat = when (alarm.workScheduleRepeat) {
+                    WorkScheduleRepeat.EVERY_WORKDAY -> true
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK ->
+                        isLastWorkdayOfWeek(schedule, cal)
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_MONTH ->
+                        isLastWorkdayOfMonth(schedule, cal)
+                    WorkScheduleRepeat.LAST_WORKDAY_OF_WEEK_AND_MONTH ->
+                        isLastWorkdayOfWeek(schedule, cal) || isLastWorkdayOfMonth(schedule, cal)
+                }
+
+                if (matchesRepeat) {
+                    // Apply time-of-month or day-of-week overrides
+                    val monthOverride = getMonthlyOverride(schedule.monthlyOverridesJson, day)
+                    val dayOverride = getDayOverride(
+                        schedule.dayOverridesJson,
+                        toIsoDayOfWeek(cal.get(Calendar.DAY_OF_WEEK))
+                    )
+                    val overrideHour = monthOverride?.hour ?: dayOverride?.hour
+                    val overrideMinute = monthOverride?.minute ?: dayOverride?.minute
+                    val triggerCal = cal.clone() as Calendar
+                    triggerCal.set(Calendar.HOUR_OF_DAY, overrideHour ?: alarm.hour)
+                    triggerCal.set(Calendar.MINUTE, overrideMinute ?: alarm.minute)
+                    triggerCal.set(Calendar.SECOND, 0)
+                    triggerCal.set(Calendar.MILLISECOND, 0)
+                    return triggerCal.timeInMillis
+                }
             }
             cal.add(Calendar.DAY_OF_YEAR, 1)
         }
@@ -371,6 +402,48 @@ class SmartAlarmManager(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
+
+    // -------------------------------------------------------------------------
+    // Last-workday helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns true if [cal] is the last work day remaining in its ISO week
+     * (i.e. no later work day exists from tomorrow through Sunday).
+     */
+    private suspend fun isLastWorkdayOfWeek(schedule: WorkSchedule, cal: Calendar): Boolean {
+        val check = cal.clone() as Calendar
+        check.add(Calendar.DAY_OF_YEAR, 1)
+        // Walk forward until we reach the next Monday (start of the next ISO week)
+        while (toIsoDayOfWeek(check.get(Calendar.DAY_OF_WEEK)) != 1) {
+            val y = check.get(Calendar.YEAR)
+            val m = check.get(Calendar.MONTH) + 1
+            val d = check.get(Calendar.DAY_OF_MONTH)
+            val isHoliday = holidayRepository.getHolidaysForDate(y, m, d).isNotEmpty()
+            if (!isHoliday && isWorkDay(schedule, check)) return false
+            check.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return true
+    }
+
+    /**
+     * Returns true if [cal] is the last work day remaining in its calendar month
+     * (i.e. no later work day exists from tomorrow through the end of the month).
+     */
+    private suspend fun isLastWorkdayOfMonth(schedule: WorkSchedule, cal: Calendar): Boolean {
+        val check = cal.clone() as Calendar
+        val currentMonth = cal.get(Calendar.MONTH)
+        check.add(Calendar.DAY_OF_YEAR, 1)
+        while (check.get(Calendar.MONTH) == currentMonth) {
+            val y = check.get(Calendar.YEAR)
+            val m = check.get(Calendar.MONTH) + 1
+            val d = check.get(Calendar.DAY_OF_MONTH)
+            val isHoliday = holidayRepository.getHolidaysForDate(y, m, d).isNotEmpty()
+            if (!isHoliday && isWorkDay(schedule, check)) return false
+            check.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return true
     }
 
     // -------------------------------------------------------------------------
