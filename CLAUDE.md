@@ -1,5 +1,7 @@
 # CLAUDE.md — Smart Alarm Clock (Android / Kotlin)
 
+> **Default branch**: `main`
+
 ## Project Overview
 
 A Kotlin-first Android alarm clock app (minSdk 26, targetSdk 34) built with:
