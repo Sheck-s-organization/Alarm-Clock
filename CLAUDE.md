@@ -1,6 +1,7 @@
 # CLAUDE.md — Smart Alarm Clock (Android / Kotlin)
 
 > **Default branch**: `main`
+> **Current date**: 2026-03-17
 
 ## Project Overview
 
