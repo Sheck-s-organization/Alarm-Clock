@@ -29,11 +29,8 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
-      - name: Download Roboto Thin font
-        run: |
-          mkdir -p app/src/main/res/font
-          curl -L "https://github.com/google/fonts/raw/main/apache/roboto/static/Roboto-Thin.ttf" \
-            -o app/src/main/res/font/roboto_thin.ttf
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
