@@ -9,8 +9,4 @@ class SmokeTest {
         assertEquals(2, 1 + 1)
     }
 
-    @Test
-    fun intentionallyFailing() {
-        assertEquals(3, 1 + 1)
-    }
 }
