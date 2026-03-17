@@ -151,102 +151,135 @@ app/
 
 ---
 
-## Implementation Plan — Personalized Alarm Clock
+## Implementation Plan — Personalized Alarm Clock (Ground-Up)
 
-The goal is a personalized alarm clock with three core pillars:
-1. **Work schedule integration** — skip alarms on days off / holidays
-2. **City-aware alarms** — different alarm behaviour depending on which city you're in
-3. **Last-workday alarms** — fire on the last workday of the week, month, or both
+All previous source code has been removed. We build one small, tested step at a time.
+Each phase must have **all tests green** before the next phase begins.
 
-Most of the backend logic already exists in `SmartAlarmManager`. The plan below focuses on
-wiring everything together, exposing it in the UI, and ensuring solid test coverage at each step.
-
----
-
-### Phase 1 — Test Foundation (Red → Green baseline)
-
-> Goal: every existing code path has at least one passing test before new work begins.
-
-- [ ] **1.1** Run `./gradlew testDebugUnitTest` and fix any currently failing tests.
-- [ ] **1.2** Add unit tests for `SmartAlarmManager` covering:
-  - `isWorkDay()` for both FIXED_DAYS and ROTATING schedules
-  - `isLastWorkdayOfWeek()` and `isLastWorkdayOfMonth()` across month boundaries
-  - `evaluateAlarmAtTrigger()` — all `AlarmDecision` outcomes (Fire, FireWithOverride, Skip)
-  - Holiday suppression logic (ONE_TIME, ANNUAL, RANGE types)
-- [ ] **1.3** Add unit tests for `HolidayRepository.isTodayHoliday()` date-matching logic.
-- [ ] **1.4** Add unit tests for `LocationRepository.isInsideLocation()` distance calculation.
+The three personalisation pillars to reach by the end:
+1. **Reliable alarm firing** — rings at the exact scheduled time, every time
+2. **Work schedule integration** — skip alarms on days off / holidays
+3. **City-aware alarms** — different alarm time depending on which city you're in
+4. **Last-workday alarms** — fire on the last workday of the week, month, or both
 
 ---
 
-### Phase 2 — Work Schedule Integration (end-to-end)
+### Phase 0 — Minimal Skeleton (app launches)
 
-> Goal: a user can define their work schedule and alarms automatically skip on days off.
+> Goal: the app compiles, launches, and shows a single empty screen. No features yet.
 
-- [ ] **2.1** Verify `EditScheduleFragment` correctly saves FIXED_DAYS schedules (e.g. Mon–Fri).
-- [ ] **2.2** Verify `AlarmViewModel.createWorkScheduleAlarm()` links an alarm to the active schedule.
-- [ ] **2.3** Ensure `AlarmReceiver` calls `evaluateAlarmAtTrigger()` and skips + logs on non-work days.
-- [ ] **2.4** Add a simple "Days off" indicator to `item_alarm.xml` so users can see which days are skipped.
-- [ ] **2.5** Write integration-style unit tests for the full skip path (mock repositories + manager).
-
----
-
-### Phase 3 — City-Aware Alarms
-
-> Goal: user can save named cities and set a different alarm time when they are in that city.
-
-- [ ] **3.1** Add reverse-geocoding helper (`CityDetector`) using `Geocoder` API to resolve
-      current lat/lng to a city name — pure-JVM testable with a mockable `Geocoder` interface.
-- [ ] **3.2** Extend `SavedLocation` with an optional `cityName: String?` field (Room migration v3).
-- [ ] **3.3** Update `LocationsFragment` / `EditLocationFragment` to display and save the resolved city name.
-- [ ] **3.4** Update `SmartAlarmManager.evaluateAlarmAtTrigger()` to apply city-based time overrides
-      (reuse the existing `AlarmLocationRule` time-override mechanism).
-- [ ] **3.5** Update `EditAlarmFragment` to let users add a "When in city X, wake me at Y instead" rule.
-- [ ] **3.6** Write unit tests for `CityDetector` and the city-override evaluation path.
+- [ ] **0.1** Create `MainActivity` — single `Activity` with an empty layout (`TextView` "Alarms").
+- [ ] **0.2** Create `AlarmApplication` — bare `Application` subclass registered in manifest.
+- [ ] **0.3** Verify `./gradlew assembleDebug` succeeds with zero errors.
+- [ ] **0.4** Write a smoke unit test (e.g. `1 + 1 == 2`) to confirm the test runner works.
 
 ---
 
-### Phase 4 — Last-Workday Alarms
+### Phase 1 — Alarm Data Model + Room
 
-> Goal: user can create an alarm that fires only on the last workday of the week, month, or both.
+> Goal: a single `Alarm` can be saved to and read from the local database.
 
-- [ ] **4.1** Confirm `isLastWorkdayOfWeek()` and `isLastWorkdayOfMonth()` handle edge cases:
-      month-end, public holidays falling on Friday, rotating-shift schedules.
-- [ ] **4.2** Expose the `LAST_WORKDAY_OF_WEEK`, `LAST_WORKDAY_OF_MONTH`, and
-      `LAST_WORKDAY_OF_WEEK_AND_MONTH` repeat options in `EditAlarmFragment`
-      (currently defined in the model but not selectable in the UI).
-- [ ] **4.3** Add a human-readable label to `item_alarm.xml` (e.g. "Last workday of month").
-- [ ] **4.4** Write unit tests covering last-workday computation for all three modes across
-      at least 3 consecutive months.
+- [ ] **1.1** Define `Alarm` entity: `id`, `label`, `hour`, `minute`, `enabled`, `createdAt`.
+- [ ] **1.2** Create `AlarmDao` with `insert`, `delete`, `getAll` (returns `Flow<List<Alarm>>`), `getById`.
+- [ ] **1.3** Create `AppDatabase` (Room, version 1) with `AlarmDao`.
+- [ ] **1.4** Create `AlarmRepository` wrapping the DAO.
+- [ ] **1.5** Write unit tests for the repository using an in-memory Room database.
 
 ---
 
-### Phase 5 — Settings Screen
+### Phase 2 — Alarm List UI
 
-> Goal: user can configure global preferences without editing code.
+> Goal: user sees a list of alarms and can add / delete one.
 
-- [ ] **5.1** Create `SettingsFragment` backed by `SharedPreferences` (using AndroidX Preference library).
-- [ ] **5.2** Expose: default snooze duration, max snooze count, vibration on/off,
-      gradual volume ramp-up on/off, alarm dismiss timeout.
-- [ ] **5.3** Wire `Constants` default values to read from `SharedPreferences` at runtime.
-- [ ] **5.4** Add Settings entry to the bottom nav or action bar overflow menu.
+- [ ] **2.1** Create `AlarmViewModel` exposing `allAlarms: StateFlow<List<Alarm>>`, `addAlarm()`, `deleteAlarm()`.
+- [ ] **2.2** Build `AlarmsFragment` with a `RecyclerView` list and a FAB that opens a time-picker dialog.
+- [ ] **2.3** Wire `MainActivity` → `AlarmsFragment` via Navigation Component.
+- [ ] **2.4** Write unit tests for `AlarmViewModel` (add, delete, list).
 
 ---
 
-### Phase 6 — Polish & Stabilisation
+### Phase 3 — Scheduling & Firing (core reliability)
 
-> Goal: app is stable, tested, and ready for daily use.
+> Goal: an enabled alarm fires at exactly the right time and rings the device.
 
-- [ ] **6.1** Add alarm history screen (read from `AlarmLog`) so users can see past events.
-- [ ] **6.2** Handle GPS/location failures gracefully in `LocationRepository` (fallback + user message).
-- [ ] **6.3** Fix `fallbackToDestructiveMigration()` — implement proper Room migrations for v2→v3.
-- [ ] **6.4** Prune old `AlarmLog` entries automatically (call `pruneOldLogs()` on DB open or via WorkManager).
-- [ ] **6.5** Final test pass: all unit tests green, no lint errors (`./gradlew check`).
+- [ ] **3.1** Create `AlarmScheduler` — schedules/cancels alarms via `AlarmManager.setAlarmClock()`.
+- [ ] **3.2** Create `AlarmReceiver` (`BroadcastReceiver`) — receives the trigger intent.
+- [ ] **3.3** Create `AlarmService` (foreground) — plays the default ringtone + vibrates.
+- [ ] **3.4** Create `AlarmFiringActivity` — full-screen dismiss screen shown over lock screen.
+- [ ] **3.5** Create `BootReceiver` — reschedules all enabled alarms after device reboot.
+- [ ] **3.6** Wire `AlarmRepository.setEnabled()` to call `AlarmScheduler.schedule/cancel`.
+- [ ] **3.7** Write unit tests for `AlarmScheduler` next-trigger-time calculation.
+- [ ] **3.8** Write unit tests for `AlarmReceiver` decision logic (mock `AlarmService` start).
+
+---
+
+### Phase 4 — Snooze & Dismiss
+
+> Goal: user can snooze or dismiss a firing alarm; snooze re-fires after N minutes.
+
+- [ ] **4.1** Add `snoozeDurationMinutes` and `snoozeMaxCount` fields to `Alarm` (Room migration v2).
+- [ ] **4.2** Create `SnoozeReceiver` — reschedules a one-shot re-trigger.
+- [ ] **4.3** Create `DismissReceiver` — stops `AlarmService`, cancels notification.
+- [ ] **4.4** Update `AlarmFiringActivity` — show Snooze / Dismiss buttons; disable Snooze when limit reached.
+- [ ] **4.5** Write unit tests for snooze rescheduling logic and max-snooze enforcement.
+
+---
+
+### Phase 5 — Work Schedule Integration
+
+> Goal: alarms skip automatically on days off and holidays.
+
+- [ ] **5.1** Define `WorkSchedule` entity: fixed weekdays (e.g. Mon–Fri), stored as `Set<Int>`.
+- [ ] **5.2** Create `WorkScheduleDao`, `WorkScheduleRepository`, `WorkScheduleViewModel`.
+- [ ] **5.3** Add a "Work schedule" screen so the user can pick their working days.
+- [ ] **5.4** Add `workScheduleId` to `Alarm` (nullable; Room migration v3).
+- [ ] **5.5** Update `AlarmReceiver` to skip firing if today is not a work day.
+- [ ] **5.6** Define `Holiday` entity (one-time and annual types); `HolidayDao`; simple import of public holidays.
+- [ ] **5.7** Update skip logic to also check holidays.
+- [ ] **5.8** Write unit tests for all skip-vs-fire decision paths.
+
+---
+
+### Phase 6 — City-Aware Alarms
+
+> Goal: user can set a different alarm time when they are in a specific city.
+
+- [ ] **6.1** Define `SavedLocation` entity: `name`, `latitude`, `longitude`, `radiusMeters`.
+- [ ] **6.2** Create `CityDetector` — resolves device lat/lng to a city name via `Geocoder` (mockable interface).
+- [ ] **6.3** Add a "Locations" screen to save named places (GPS or manual entry).
+- [ ] **6.4** Add optional `locationOverrides: List<LocationTimeOverride>` to `Alarm` (JSON column).
+- [ ] **6.5** Update `AlarmReceiver` / `AlarmScheduler` to apply city-based time override when matched.
+- [ ] **6.6** Write unit tests for `CityDetector` and the override evaluation logic.
+
+---
+
+### Phase 7 — Last-Workday Alarms
+
+> Goal: an alarm can be set to fire on the last workday of the week, month, or both.
+
+- [ ] **7.1** Add `RepeatMode` enum to `Alarm`: `DAILY`, `WEEKDAYS`, `LAST_WORKDAY_OF_WEEK`,
+      `LAST_WORKDAY_OF_MONTH`, `LAST_WORKDAY_OF_WEEK_AND_MONTH`.
+- [ ] **7.2** Implement last-workday calculation helpers (pure functions, no Android deps).
+- [ ] **7.3** Expose repeat mode selector in the alarm edit UI.
+- [ ] **7.4** Update `AlarmScheduler` to compute the correct next trigger for each repeat mode.
+- [ ] **7.5** Write unit tests across month/year boundaries and with holidays blocking the last Friday.
+
+---
+
+### Phase 8 — Polish & Settings
+
+> Goal: app is stable and user-configurable.
+
+- [ ] **8.1** Add `SettingsFragment`: default snooze duration, vibration on/off, dismiss timeout.
+- [ ] **8.2** Add alarm history log (`AlarmLog` entity) — view past fire/skip/dismiss events.
+- [ ] **8.3** Handle GPS failures gracefully (fallback message, no crash).
+- [ ] **8.4** Final pass: `./gradlew check` clean, all tests green.
 
 ---
 
 ### Definition of Done (per phase)
 
-- All new classes/functions have at least one unit test.
+- Every new class / function has at least one unit test.
 - `./gradlew testDebugUnitTest` exits 0 before any PR is opened.
 - Each phase ships as its own PR targeting `main`.
 
