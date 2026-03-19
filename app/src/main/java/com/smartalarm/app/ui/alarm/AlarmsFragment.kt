@@ -23,14 +23,17 @@ class AlarmsFragment : Fragment(R.layout.fragment_alarms) {
 
     private val viewModel: AlarmViewModel by viewModels {
         val app = requireActivity().application as AlarmApplication
-        AlarmViewModelFactory(app.repository)
+        AlarmViewModelFactory(app, app.repository)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAlarmsBinding.bind(view)
 
-        val adapter = AlarmsAdapter { alarm -> showDeleteConfirmDialog(alarm) }
+        val adapter = AlarmsAdapter(
+            onDelete = { alarm -> showDeleteConfirmDialog(alarm) },
+            onToggle = { alarm, enabled -> viewModel.setEnabled(alarm, enabled) }
+        )
         binding.recyclerAlarms.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {

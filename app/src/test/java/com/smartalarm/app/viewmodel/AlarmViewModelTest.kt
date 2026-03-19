@@ -1,5 +1,6 @@
 package com.smartalarm.app.viewmodel
 
+import android.app.Application
 import com.smartalarm.app.data.dao.AlarmDao
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.repository.AlarmRepository
@@ -16,6 +17,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AlarmViewModelTest {
@@ -30,7 +32,7 @@ class AlarmViewModelTest {
         Dispatchers.setMain(testDispatcher)
         fakeDao = FakeAlarmDao()
         repository = AlarmRepository(fakeDao)
-        viewModel = AlarmViewModel(repository)
+        viewModel = AlarmViewModel(mock(Application::class.java), repository)
     }
 
     @After
@@ -101,4 +103,12 @@ private class FakeAlarmDao : AlarmDao {
     override fun getAll(): Flow<List<Alarm>> = flow
 
     override suspend fun getById(id: Long): Alarm? = alarms.find { it.id == id }
+
+    override suspend fun setEnabled(id: Long, enabled: Boolean) {
+        val index = alarms.indexOfFirst { it.id == id }
+        if (index != -1) {
+            alarms[index] = alarms[index].copy(enabled = enabled)
+            flow.value = alarms.toList()
+        }
+    }
 }
