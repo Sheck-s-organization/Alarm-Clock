@@ -20,4 +20,13 @@ class AlarmRepository(private val alarmDao: AlarmDao) {
         val alarm = alarmDao.getById(id) ?: return
         if (enabled) scheduler.schedule(alarm) else scheduler.cancel(alarm)
     }
+
+    suspend fun incrementSnoozeCount(id: Long) {
+        val alarm = alarmDao.getById(id) ?: return
+        alarmDao.setSnoozeCount(id, alarm.snoozeCount + 1)
+    }
+
+    suspend fun resetSnoozeCount(id: Long) {
+        alarmDao.setSnoozeCount(id, 0)
+    }
 }

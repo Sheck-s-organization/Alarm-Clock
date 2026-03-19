@@ -14,6 +14,15 @@ A Kotlin-first Android alarm clock app (minSdk 26, targetSdk 34) built with:
 
 ---
 
+## Build & Test Environment
+
+> **Important**: The Android build toolchain (Gradle, Android SDK) is **not available locally** in
+> Claude Code sessions. Do **not** attempt to run `./gradlew` commands — they will fail.
+>
+> All compilation and test execution happens automatically in the **CI pipeline** after every push.
+> Once your changes look correct, commit and push — CI will validate the build and run the full
+> unit-test suite.
+
 ## Session Start Checklist
 
 At the beginning of **every** session run these steps in order:
@@ -35,7 +44,7 @@ git checkout -b claude/<short-description>-<sessionId>   # new branch
 
 # 4. Confirm starting state
 git status
-./gradlew testDebugUnitTest   # all tests must be green before any work begins
+# Note: do NOT run ./gradlew — tests run in CI after push (see "Build & Test Environment" above)
 ```
 
 If `main` does not exist on the remote, create it from the current default branch:
@@ -51,24 +60,23 @@ git push -u origin main
 
 Follow the **Red → Green → Refactor** cycle for every code change.
 
+> **Reminder**: `./gradlew` is not available locally — CI runs the tests on every push.
+> Write the test, write the production code, review both for correctness, then push.
+
 ### 1. Red — write a failing test first
 
 - Add a unit test under `app/src/test/` that describes the desired behaviour.
-- Run it and confirm it **fails** for the right reason:
-
-```bash
-./gradlew testDebugUnitTest
-```
+- Confirm the test would fail before the production code exists (code review, not execution).
 
 ### 2. Green — write the minimal production code to pass
 
 - Implement only what is needed to make the failing test(s) pass.
-- Re-run the tests and confirm they are **all green**.
+- Review both test and production code together before pushing.
 
 ### 3. Refactor — clean up
 
 - Remove duplication, improve naming, simplify logic.
-- Re-run tests after every change — they must stay green.
+- Push — CI will confirm all tests stay green.
 
 ### Test locations
 
@@ -93,7 +101,7 @@ Run instrumented tests (requires connected device or emulator):
 
 A PR **must not** be created until:
 
-1. **All unit tests pass** — `./gradlew testDebugUnitTest` exits with code 0.
+1. **All unit tests pass** — CI pipeline on the feature branch is green.
 2. **New code is covered** — every new class / function introduced has at least one test.
 3. **No regressions** — the full test suite is green, not just the new tests.
 4. **Branch is up-to-date** — rebase or merge `main` into your feature branch before opening the PR.
@@ -101,27 +109,30 @@ A PR **must not** be created until:
 ```bash
 # Pre-PR checklist
 git fetch origin
-git rebase origin/main          # or: git merge origin/main
-./gradlew testDebugUnitTest     # must be: BUILD SUCCESSFUL
+git rebase origin/main   # or: git merge origin/main
+git push -u origin <branch>
+# Then verify CI is green before opening the PR
 ```
 
-Only after all of the above should you open a PR targeting `main`.
+Only after CI is green should you open a PR targeting `main`.
 
 ---
 
 ## Build Commands
 
+> **Note**: These commands run in CI, not locally. Push your branch to trigger them.
+
 ```bash
-# Compile only (no tests)
+# Compile only (no tests)  — runs in CI
 ./gradlew assembleDebug
 
-# Unit tests
+# Unit tests               — runs in CI
 ./gradlew testDebugUnitTest
 
-# Full check (compile + lint + unit tests)
+# Full check (compile + lint + unit tests) — runs in CI
 ./gradlew check
 
-# Clean build
+# Clean build              — runs in CI
 ./gradlew clean assembleDebug
 ```
 

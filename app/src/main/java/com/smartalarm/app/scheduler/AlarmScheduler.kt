@@ -12,6 +12,8 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+private const val SNOOZE_REQUEST_CODE_OFFSET = 10_000
+
 open class AlarmScheduler(private val context: Context) {
 
     private val alarmManager: AlarmManager by lazy {
@@ -39,6 +41,34 @@ open class AlarmScheduler(private val context: Context) {
         alarmManager.cancel(buildPendingIntent(alarm.id))
     }
 
+    open fun scheduleSnooze(alarm: Alarm, triggerAtMillis: Long) {
+        if (!alarmManager.canScheduleExactAlarms()) {
+            LogBuffer.e(TAG, "SCHEDULE_EXACT_ALARM permission not granted — snooze for alarm ${alarm.id} will NOT fire.")
+            return
+        }
+        val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        LogBuffer.d(TAG, "Snooze for alarm ${alarm.id} scheduled at ${fmt.format(Date(triggerAtMillis))}")
+        val pendingIntent = buildSnoozePendingIntent(alarm.id)
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+    }
+
+    open fun cancelSnooze(alarm: Alarm) {
+        LogBuffer.d(TAG, "Snooze for alarm ${alarm.id} cancelled")
+        alarmManager.cancel(buildSnoozePendingIntent(alarm.id))
+    }
+
+    private fun buildSnoozePendingIntent(alarmId: Long): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra(AlarmReceiver.EXTRA_ALARM_ID, alarmId)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            (alarmId + SNOOZE_REQUEST_CODE_OFFSET).toInt(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
     private fun buildPendingIntent(alarmId: Long): PendingIntent {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra(AlarmReceiver.EXTRA_ALARM_ID, alarmId)
@@ -53,6 +83,15 @@ open class AlarmScheduler(private val context: Context) {
 
     companion object {
         private const val TAG = "AlarmScheduler"
+
+        /**
+         * Calculates the snooze trigger time: [nowMillis] + [snoozeDurationMinutes] in milliseconds.
+         */
+        fun snoozeTriggerTimeMillis(
+            snoozeDurationMinutes: Int,
+            nowMillis: Long = System.currentTimeMillis()
+        ): Long = nowMillis + snoozeDurationMinutes * 60_000L
+
         /**
          * Calculates the next trigger time in milliseconds for an alarm at [hour]:[minute].
          * If that time has already passed today, schedules for tomorrow.

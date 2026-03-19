@@ -11,5 +11,8 @@ data class Alarm(
     val hour: Int,
     val minute: Int,
     val enabled: Boolean = true,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val snoozeDurationMinutes: Int = 9,
+    val snoozeMaxCount: Int = 3,
+    val snoozeCount: Int = 0
 )

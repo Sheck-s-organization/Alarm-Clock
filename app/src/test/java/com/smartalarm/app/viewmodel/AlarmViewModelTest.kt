@@ -114,4 +114,12 @@ private class FakeAlarmDao : AlarmDao {
             flow.value = alarms.toList()
         }
     }
+
+    override suspend fun setSnoozeCount(id: Long, count: Int) {
+        val index = alarms.indexOfFirst { it.id == id }
+        if (index != -1) {
+            alarms[index] = alarms[index].copy(snoozeCount = count)
+            flow.value = alarms.toList()
+        }
+    }
 }

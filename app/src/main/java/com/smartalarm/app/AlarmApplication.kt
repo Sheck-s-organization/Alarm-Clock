@@ -8,7 +8,9 @@ import com.smartalarm.app.data.repository.AlarmRepository
 class AlarmApplication : Application() {
 
     val database: AppDatabase by lazy {
-        Room.databaseBuilder(this, AppDatabase::class.java, "alarm_database").build()
+        Room.databaseBuilder(this, AppDatabase::class.java, "alarm_database")
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .build()
     }
 
     val repository: AlarmRepository by lazy {
