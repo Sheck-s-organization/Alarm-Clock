@@ -23,7 +23,9 @@ class AlarmViewModel(
 
     fun addAlarm(hour: Int, minute: Int, label: String = "Alarm") {
         viewModelScope.launch {
-            repository.insert(Alarm(label = label, hour = hour, minute = minute))
+            val id = repository.insert(Alarm(label = label, hour = hour, minute = minute))
+            val alarm = repository.getById(id) ?: return@launch
+            AlarmScheduler(getApplication()).schedule(alarm)
         }
     }
 

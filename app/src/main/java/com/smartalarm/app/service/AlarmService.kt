@@ -19,6 +19,7 @@ import com.smartalarm.app.ui.firing.AlarmFiringActivity
 class AlarmService : LifecycleService() {
 
     private var ringtone: Ringtone? = null
+    private var vibrator: Vibrator? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -44,6 +45,7 @@ class AlarmService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         ringtone?.stop()
+        vibrator?.cancel()
     }
 
     private fun playRingtone() {
@@ -54,12 +56,12 @@ class AlarmService : LifecycleService() {
 
     @Suppress("DEPRECATION")
     private fun vibrate() {
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val pattern = longArrayOf(0, 1000, 500, 1000, 500)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))
+            vibrator?.vibrate(VibrationEffect.createWaveform(pattern, 0))
         } else {
-            vibrator.vibrate(pattern, 0)
+            vibrator?.vibrate(pattern, 0)
         }
     }
 
