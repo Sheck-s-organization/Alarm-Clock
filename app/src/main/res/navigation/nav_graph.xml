@@ -71,4 +71,11 @@
         android:label="@string/nav_locations"
         tools:layout="@layout/fragment_locations" />
 
+    <!-- Logs (debug) -->
+    <fragment
+        android:id="@+id/nav_logs"
+        android:name="com.smartalarm.app.ui.logs.LogsFragment"
+        android:label="@string/nav_logs"
+        tools:layout="@layout/fragment_logs" />
+
 </navigation>

@@ -4,9 +4,9 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.receiver.AlarmReceiver
+import com.smartalarm.app.util.LogBuffer
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -20,19 +20,22 @@ open class AlarmScheduler(private val context: Context) {
 
     open fun schedule(alarm: Alarm) {
         if (!alarmManager.canScheduleExactAlarms()) {
-            Log.e(TAG, "schedule: SCHEDULE_EXACT_ALARM permission not granted — alarm ${alarm.id} will NOT fire")
+            LogBuffer.e(TAG, "SCHEDULE_EXACT_ALARM permission not granted — alarm ${alarm.id} will NOT fire. Grant it in Settings → Apps → Alarms & reminders.")
             return
         }
         val triggerAtMillis = nextTriggerTimeMillis(alarm.hour, alarm.minute)
         val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        Log.d(TAG, "schedule: alarm ${alarm.id} (${alarm.label}) set for ${fmt.format(Date(triggerAtMillis))}")
+        val triggerStr = fmt.format(Date(triggerAtMillis))
+        LogBuffer.d(TAG, "Alarm ${alarm.id} \"${alarm.label}\" scheduled for $triggerStr")
         val pendingIntent = buildPendingIntent(alarm.id)
         val alarmClockInfo = AlarmManager.AlarmClockInfo(triggerAtMillis, pendingIntent)
         alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
-        Log.d(TAG, "schedule: setAlarmClock() called — next alarm clock: ${alarmManager.nextAlarmClock?.let { fmt.format(Date(it.triggerTime)) } ?: "none"}")
+        val nextStr = alarmManager.nextAlarmClock?.let { fmt.format(Date(it.triggerTime)) } ?: "none"
+        LogBuffer.d(TAG, "setAlarmClock() OK — system next alarm: $nextStr")
     }
 
     open fun cancel(alarm: Alarm) {
+        LogBuffer.d(TAG, "Alarm ${alarm.id} cancelled")
         alarmManager.cancel(buildPendingIntent(alarm.id))
     }
 

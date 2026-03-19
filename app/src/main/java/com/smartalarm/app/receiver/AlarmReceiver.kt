@@ -3,21 +3,20 @@ package com.smartalarm.app.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.smartalarm.app.service.AlarmService
+import com.smartalarm.app.util.LogBuffer
 
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d(TAG, "onReceive: intent=$intent")
         context ?: return
         val rawId = intent?.getLongExtra(EXTRA_ALARM_ID, INVALID_ID) ?: INVALID_ID
         val alarmId = alarmIdFromIntent(rawId)
         if (alarmId == null) {
-            Log.e(TAG, "onReceive: invalid alarm id ($rawId) — dropping")
+            LogBuffer.e(TAG, "Received intent with invalid alarm id ($rawId) — dropped")
             return
         }
-        Log.d(TAG, "onReceive: starting AlarmService for alarm $alarmId")
+        LogBuffer.d(TAG, "Alarm $alarmId triggered — starting AlarmService")
         AlarmService.start(context, alarmId)
     }
 

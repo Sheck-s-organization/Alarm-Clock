@@ -7,6 +7,11 @@
     <string name="nav_schedule">Schedule</string>
     <string name="nav_holidays">Holidays</string>
     <string name="nav_locations">Locations</string>
+    <string name="nav_logs">Logs</string>
+
+    <!-- Logs screen -->
+    <string name="no_logs_yet">No events logged yet.\nSet an alarm to see activity here.</string>
+    <string name="clear_logs">Clear</string>
 
     <!-- Alarms screen -->
     <string name="no_alarms_yet">No alarms yet.\nTap + to add one.</string>
