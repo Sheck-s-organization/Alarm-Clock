@@ -22,4 +22,7 @@ interface AlarmDao {
 
     @Query("SELECT * FROM alarms WHERE id = :id")
     suspend fun getById(id: Long): Alarm?
+
+    @Query("UPDATE alarms SET enabled = :enabled WHERE id = :id")
+    suspend fun setEnabled(id: Long, enabled: Boolean)
 }

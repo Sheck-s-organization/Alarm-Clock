@@ -1,23 +1,32 @@
 package com.smartalarm.app.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.repository.AlarmRepository
+import com.smartalarm.app.scheduler.AlarmScheduler
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class AlarmViewModel(private val repository: AlarmRepository) : ViewModel() {
+class AlarmViewModel(
+    application: Application,
+    private val repository: AlarmRepository,
+    private val scheduler: AlarmScheduler = AlarmScheduler(application)
+) : AndroidViewModel(application) {
 
     val allAlarms: StateFlow<List<Alarm>> = repository.allAlarms
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     fun addAlarm(hour: Int, minute: Int, label: String = "Alarm") {
         viewModelScope.launch {
-            repository.insert(Alarm(label = label, hour = hour, minute = minute))
+            val id = repository.insert(Alarm(label = label, hour = hour, minute = minute))
+            val alarm = repository.getById(id) ?: return@launch
+            scheduler.schedule(alarm)
         }
     }
 
@@ -26,13 +35,22 @@ class AlarmViewModel(private val repository: AlarmRepository) : ViewModel() {
             repository.delete(alarm)
         }
     }
+
+    fun setEnabled(alarm: Alarm, enabled: Boolean) {
+        viewModelScope.launch {
+            repository.setEnabled(alarm.id, enabled, scheduler)
+        }
+    }
 }
 
-class AlarmViewModelFactory(private val repository: AlarmRepository) : ViewModelProvider.Factory {
+class AlarmViewModelFactory(
+    private val application: Application,
+    private val repository: AlarmRepository
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AlarmViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AlarmViewModel(repository) as T
+            return AlarmViewModel(application, repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }

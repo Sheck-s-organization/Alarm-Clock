@@ -1,8 +1,10 @@
 package com.smartalarm.app.viewmodel
 
+import android.app.Application
 import com.smartalarm.app.data.dao.AlarmDao
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.repository.AlarmRepository
+import com.smartalarm.app.scheduler.AlarmScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +18,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AlarmViewModelTest {
@@ -23,6 +26,7 @@ class AlarmViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeDao: FakeAlarmDao
     private lateinit var repository: AlarmRepository
+    private lateinit var mockScheduler: AlarmScheduler
     private lateinit var viewModel: AlarmViewModel
 
     @Before
@@ -30,7 +34,8 @@ class AlarmViewModelTest {
         Dispatchers.setMain(testDispatcher)
         fakeDao = FakeAlarmDao()
         repository = AlarmRepository(fakeDao)
-        viewModel = AlarmViewModel(repository)
+        mockScheduler = mock(AlarmScheduler::class.java)
+        viewModel = AlarmViewModel(mock(Application::class.java), repository, mockScheduler)
     }
 
     @After
@@ -101,4 +106,12 @@ private class FakeAlarmDao : AlarmDao {
     override fun getAll(): Flow<List<Alarm>> = flow
 
     override suspend fun getById(id: Long): Alarm? = alarms.find { it.id == id }
+
+    override suspend fun setEnabled(id: Long, enabled: Boolean) {
+        val index = alarms.indexOfFirst { it.id == id }
+        if (index != -1) {
+            alarms[index] = alarms[index].copy(enabled = enabled)
+            flow.value = alarms.toList()
+        }
+    }
 }

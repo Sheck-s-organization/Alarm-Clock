@@ -21,4 +21,9 @@
         android:icon="@drawable/ic_location_pin"
         android:title="@string/nav_locations" />
 
+    <item
+        android:id="@+id/nav_logs"
+        android:icon="@drawable/ic_logs"
+        android:title="@string/nav_logs" />
+
 </menu>

@@ -9,7 +9,8 @@ import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.databinding.ItemAlarmBinding
 
 class AlarmsAdapter(
-    private val onDelete: (Alarm) -> Unit
+    private val onDelete: (Alarm) -> Unit,
+    private val onToggle: (Alarm, Boolean) -> Unit = { _, _ -> }
 ) : ListAdapter<Alarm, AlarmsAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     class ViewHolder(val binding: ItemAlarmBinding) : RecyclerView.ViewHolder(binding.root)
@@ -28,6 +29,7 @@ class AlarmsAdapter(
             tvRepeatDays.text = ""
             switchEnabled.setOnCheckedChangeListener(null)
             switchEnabled.isChecked = alarm.enabled
+            switchEnabled.setOnCheckedChangeListener { _, isChecked -> onToggle(alarm, isChecked) }
         }
         holder.itemView.setOnLongClickListener {
             onDelete(alarm)
