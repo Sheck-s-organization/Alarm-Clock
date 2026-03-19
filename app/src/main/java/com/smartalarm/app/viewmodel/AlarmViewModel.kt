@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class AlarmViewModel(
     application: Application,
-    private val repository: AlarmRepository
+    private val repository: AlarmRepository,
+    private val scheduler: AlarmScheduler = AlarmScheduler(application)
 ) : AndroidViewModel(application) {
 
     val allAlarms: StateFlow<List<Alarm>> = repository.allAlarms
@@ -25,7 +26,7 @@ class AlarmViewModel(
         viewModelScope.launch {
             val id = repository.insert(Alarm(label = label, hour = hour, minute = minute))
             val alarm = repository.getById(id) ?: return@launch
-            AlarmScheduler(getApplication()).schedule(alarm)
+            scheduler.schedule(alarm)
         }
     }
 
@@ -37,7 +38,6 @@ class AlarmViewModel(
 
     fun setEnabled(alarm: Alarm, enabled: Boolean) {
         viewModelScope.launch {
-            val scheduler = AlarmScheduler(getApplication())
             repository.setEnabled(alarm.id, enabled, scheduler)
         }
     }

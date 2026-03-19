@@ -4,6 +4,7 @@ import android.app.Application
 import com.smartalarm.app.data.dao.AlarmDao
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.repository.AlarmRepository
+import com.smartalarm.app.scheduler.AlarmScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,7 @@ class AlarmViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var fakeDao: FakeAlarmDao
     private lateinit var repository: AlarmRepository
+    private lateinit var mockScheduler: AlarmScheduler
     private lateinit var viewModel: AlarmViewModel
 
     @Before
@@ -32,7 +34,8 @@ class AlarmViewModelTest {
         Dispatchers.setMain(testDispatcher)
         fakeDao = FakeAlarmDao()
         repository = AlarmRepository(fakeDao)
-        viewModel = AlarmViewModel(mock(Application::class.java), repository)
+        mockScheduler = mock(AlarmScheduler::class.java)
+        viewModel = AlarmViewModel(mock(Application::class.java), repository, mockScheduler)
     }
 
     @After
