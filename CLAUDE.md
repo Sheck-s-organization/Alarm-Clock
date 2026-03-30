@@ -284,7 +284,8 @@ The three personalisation pillars to reach by the end:
 - [ ] **8.1** Add `SettingsFragment`: default snooze duration, vibration on/off, dismiss timeout.
 - [ ] **8.2** Add alarm history log (`AlarmLog` entity) — view past fire/skip/dismiss events.
 - [ ] **8.3** Handle GPS failures gracefully (fallback message, no crash).
-- [ ] **8.4** Final pass: `./gradlew check` clean, all tests green.
+- [ ] **8.4** Add edit-alarm flow — tap an existing alarm to open the same time-picker/detail screen pre-filled; update via `AlarmRepository.update()` and reschedule.
+- [ ] **8.5** Final pass: `./gradlew check` clean, all tests green.
 
 ---
 
