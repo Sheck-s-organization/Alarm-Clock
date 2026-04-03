@@ -13,6 +13,7 @@ import java.util.Date
 import java.util.Locale
 
 private const val SNOOZE_REQUEST_CODE_OFFSET = 10_000
+private const val LOCATION_OVERRIDE_REQUEST_CODE_OFFSET = 20_000
 
 open class AlarmScheduler(private val context: Context) {
 
@@ -55,6 +56,42 @@ open class AlarmScheduler(private val context: Context) {
     open fun cancelSnooze(alarm: Alarm) {
         LogBuffer.d(TAG, "Snooze for alarm ${alarm.id} cancelled")
         alarmManager.cancel(buildSnoozePendingIntent(alarm.id))
+    }
+
+    /**
+     * Schedules a one-shot location-override alarm for [alarm] to fire at [hour]:[minute] today
+     * (or tomorrow if that time has already passed). The fired intent will carry
+     * [AlarmReceiver.EXTRA_IS_LOCATION_OVERRIDE] = true so the receiver skips re-evaluating
+     * location and fires immediately.
+     */
+    open fun scheduleLocationOverride(alarm: Alarm, hour: Int, minute: Int) {
+        if (!alarmManager.canScheduleExactAlarms()) {
+            LogBuffer.e(TAG, "SCHEDULE_EXACT_ALARM permission not granted — location override for alarm ${alarm.id} will NOT fire.")
+            return
+        }
+        val triggerAtMillis = nextTriggerTimeMillis(hour, minute)
+        val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        LogBuffer.d(TAG, "Location override for alarm ${alarm.id} scheduled at ${fmt.format(Date(triggerAtMillis))}")
+        val pendingIntent = buildLocationOverridePendingIntent(alarm.id)
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+    }
+
+    open fun cancelLocationOverride(alarm: Alarm) {
+        LogBuffer.d(TAG, "Location override for alarm ${alarm.id} cancelled")
+        alarmManager.cancel(buildLocationOverridePendingIntent(alarm.id))
+    }
+
+    private fun buildLocationOverridePendingIntent(alarmId: Long): PendingIntent {
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra(AlarmReceiver.EXTRA_ALARM_ID, alarmId)
+            putExtra(AlarmReceiver.EXTRA_IS_LOCATION_OVERRIDE, true)
+        }
+        return PendingIntent.getBroadcast(
+            context,
+            (alarmId + LOCATION_OVERRIDE_REQUEST_CODE_OFFSET).toInt(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun buildSnoozePendingIntent(alarmId: Long): PendingIntent {

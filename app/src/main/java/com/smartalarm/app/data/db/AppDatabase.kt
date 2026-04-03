@@ -7,14 +7,16 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.smartalarm.app.data.dao.AlarmDao
 import com.smartalarm.app.data.dao.HolidayDao
+import com.smartalarm.app.data.dao.SavedLocationDao
 import com.smartalarm.app.data.dao.WorkScheduleDao
 import com.smartalarm.app.data.entities.Alarm
 import com.smartalarm.app.data.entities.Holiday
+import com.smartalarm.app.data.entities.SavedLocation
 import com.smartalarm.app.data.entities.WorkSchedule
 
 @Database(
-    entities = [Alarm::class, WorkSchedule::class, Holiday::class],
-    version = 3,
+    entities = [Alarm::class, WorkSchedule::class, Holiday::class, SavedLocation::class],
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -22,6 +24,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun alarmDao(): AlarmDao
     abstract fun workScheduleDao(): WorkScheduleDao
     abstract fun holidayDao(): HolidayDao
+    abstract fun savedLocationDao(): SavedLocationDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -54,6 +57,23 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                 // New nullable column on alarms
                 db.execSQL("ALTER TABLE alarms ADD COLUMN workScheduleId INTEGER")
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // New saved_locations table
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS saved_locations (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        name TEXT NOT NULL,
+                        latitude REAL NOT NULL,
+                        longitude REAL NOT NULL,
+                        radiusMeters REAL NOT NULL DEFAULT 500.0
+                    )"""
+                )
+                // Location overrides JSON column on alarms (empty array default)
+                db.execSQL("ALTER TABLE alarms ADD COLUMN locationOverrides TEXT NOT NULL DEFAULT '[]'")
             }
         }
     }
