@@ -4,6 +4,7 @@ import com.smartalarm.app.data.dao.HolidayDao
 import com.smartalarm.app.data.entities.Holiday
 import com.smartalarm.app.data.entities.HolidayType
 import kotlinx.coroutines.flow.Flow
+import java.util.Calendar
 
 class HolidayRepository(private val dao: HolidayDao) {
 
@@ -15,19 +16,100 @@ class HolidayRepository(private val dao: HolidayDao) {
 
     suspend fun getAllNow(): List<Holiday> = dao.getAllNow()
 
-    /** Inserts the fixed-date US federal holidays (annual, repeating). */
-    suspend fun importUsHolidays() {
-        dao.insertAll(US_FEDERAL_HOLIDAYS)
+    /**
+     * Inserts all 11 US federal holidays.
+     * Fixed-date holidays are inserted as ANNUAL (repeating every year).
+     * Floating holidays are pre-calculated as ONE_TIME entries for the current
+     * year through [yearsAhead] years out, so they can be deleted individually
+     * if you don't have a particular day off.
+     */
+    suspend fun importUsHolidays(yearsAhead: Int = 5) {
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        val holidays = mutableListOf<Holiday>()
+        holidays += FIXED_FEDERAL_HOLIDAYS
+        for (year in currentYear..(currentYear + yearsAhead)) {
+            holidays += floatingHolidaysForYear(year)
+        }
+        dao.insertAll(holidays)
     }
 
     companion object {
-        val US_FEDERAL_HOLIDAYS = listOf(
-            Holiday(name = "New Year's Day",      month = 1,  day = 1,  type = HolidayType.ANNUAL),
-            Holiday(name = "Independence Day",    month = 7,  day = 4,  type = HolidayType.ANNUAL),
-            Holiday(name = "Veterans Day",        month = 11, day = 11, type = HolidayType.ANNUAL),
-            Holiday(name = "Christmas Day",       month = 12, day = 25, type = HolidayType.ANNUAL)
-            // Floating holidays (MLK Day, Presidents Day, Memorial Day, Labor Day,
-            // Columbus Day, Thanksgiving) require last-workday logic — deferred to Phase 7.
+
+        /** Fixed-date US federal holidays — same date every year. */
+        val FIXED_FEDERAL_HOLIDAYS = listOf(
+            Holiday(name = "New Year's Day",   month = 1,  day = 1,  type = HolidayType.ANNUAL),
+            Holiday(name = "Juneteenth",       month = 6,  day = 19, type = HolidayType.ANNUAL),
+            Holiday(name = "Independence Day", month = 7,  day = 4,  type = HolidayType.ANNUAL),
+            Holiday(name = "Veterans Day",     month = 11, day = 11, type = HolidayType.ANNUAL),
+            Holiday(name = "Christmas Day",    month = 12, day = 25, type = HolidayType.ANNUAL),
         )
+
+        /** Returns the 6 floating US federal holidays as ONE_TIME entries for [year]. */
+        fun floatingHolidaysForYear(year: Int): List<Holiday> = listOf(
+            Holiday(
+                name = "Martin Luther King Jr. Day",
+                month = 1, day = nthWeekday(year, 1, Calendar.MONDAY, 3),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+            Holiday(
+                name = "Presidents' Day",
+                month = 2, day = nthWeekday(year, 2, Calendar.MONDAY, 3),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+            Holiday(
+                name = "Memorial Day",
+                month = 5, day = lastWeekday(year, 5, Calendar.MONDAY),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+            Holiday(
+                name = "Labor Day",
+                month = 9, day = nthWeekday(year, 9, Calendar.MONDAY, 1),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+            Holiday(
+                name = "Columbus Day",
+                month = 10, day = nthWeekday(year, 10, Calendar.MONDAY, 2),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+            Holiday(
+                name = "Thanksgiving Day",
+                month = 11, day = nthWeekday(year, 11, Calendar.THURSDAY, 4),
+                year = year, type = HolidayType.ONE_TIME
+            ),
+        )
+
+        /**
+         * Returns the day-of-month for the [nth] occurrence of [weekday]
+         * (a [Calendar.DAY_OF_WEEK] constant) in [month]/[year].
+         */
+        fun nthWeekday(year: Int, month: Int, weekday: Int, nth: Int): Int {
+            val cal = Calendar.getInstance().apply { set(year, month - 1, 1) }
+            var count = 0
+            repeat(31) {
+                if (cal.get(Calendar.MONTH) == month - 1) {
+                    if (cal.get(Calendar.DAY_OF_WEEK) == weekday) {
+                        count++
+                        if (count == nth) return cal.get(Calendar.DAY_OF_MONTH)
+                    }
+                    cal.add(Calendar.DAY_OF_MONTH, 1)
+                }
+            }
+            error("nthWeekday($year, $month, $weekday, $nth) not found — invalid input")
+        }
+
+        /**
+         * Returns the day-of-month for the last [weekday]
+         * (a [Calendar.DAY_OF_WEEK] constant) in [month]/[year].
+         */
+        fun lastWeekday(year: Int, month: Int, weekday: Int): Int {
+            val cal = Calendar.getInstance().apply {
+                set(year, month - 1, 1)
+                set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+            }
+            while (cal.get(Calendar.DAY_OF_WEEK) != weekday) {
+                cal.add(Calendar.DAY_OF_MONTH, -1)
+            }
+            return cal.get(Calendar.DAY_OF_MONTH)
+        }
     }
 }
