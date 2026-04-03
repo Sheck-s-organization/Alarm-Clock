@@ -19,17 +19,12 @@ class HolidayRepository(private val dao: HolidayDao) {
     /**
      * Inserts all 11 US federal holidays.
      * Fixed-date holidays are inserted as ANNUAL (repeating every year).
-     * Floating holidays are pre-calculated as ONE_TIME entries for the current
-     * year through [yearsAhead] years out, so they can be deleted individually
-     * if you don't have a particular day off.
+     * Each floating holiday is inserted as a single ONE_TIME entry for its
+     * next upcoming occurrence — this year if the date hasn't passed yet,
+     * otherwise next year.
      */
-    suspend fun importUsHolidays(yearsAhead: Int = 5) {
-        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-        val holidays = mutableListOf<Holiday>()
-        holidays += FIXED_FEDERAL_HOLIDAYS
-        for (year in currentYear..(currentYear + yearsAhead)) {
-            holidays += floatingHolidaysForYear(year)
-        }
+    suspend fun importUsHolidays(today: Calendar = Calendar.getInstance()) {
+        val holidays = FIXED_FEDERAL_HOLIDAYS + nextFloatingHolidays(today)
         dao.insertAll(holidays)
     }
 
@@ -43,6 +38,26 @@ class HolidayRepository(private val dao: HolidayDao) {
             Holiday(name = "Veterans Day",     month = 11, day = 11, type = HolidayType.ANNUAL),
             Holiday(name = "Christmas Day",    month = 12, day = 25, type = HolidayType.ANNUAL),
         )
+
+        /**
+         * Returns one ONE_TIME entry per floating holiday, each set to its next
+         * upcoming occurrence relative to [today].
+         */
+        fun nextFloatingHolidays(today: Calendar = Calendar.getInstance()): List<Holiday> {
+            val year = today.get(Calendar.YEAR)
+            return floatingHolidaysForYear(year).map { holiday ->
+                // If this year's date has already passed, bump to next year.
+                val holidayCal = Calendar.getInstance().apply {
+                    set(year, holiday.month - 1, holiday.day)
+                }
+                if (holidayCal.before(today)) {
+                    floatingHolidaysForYear(year + 1)
+                        .first { it.name == holiday.name }
+                } else {
+                    holiday
+                }
+            }
+        }
 
         /** Returns the 6 floating US federal holidays as ONE_TIME entries for [year]. */
         fun floatingHolidaysForYear(year: Int): List<Holiday> = listOf(

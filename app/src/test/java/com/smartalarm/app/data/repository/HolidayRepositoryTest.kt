@@ -100,4 +100,40 @@ class HolidayRepositoryTest {
             assertEquals(2025, it.year)
         }
     }
+
+    // --- nextFloatingHolidays ---
+
+    @Test
+    fun nextFloatingHolidays_returnsSixEntries() {
+        val today = Calendar.getInstance().apply { set(2025, Calendar.JANUARY, 1) }
+        assertEquals(6, HolidayRepository.nextFloatingHolidays(today).size)
+    }
+
+    @Test
+    fun nextFloatingHolidays_usesCurrentYearWhenDateNotYetPassed() {
+        // Jan 1 2025 — MLK Day (Jan 20) hasn't passed yet
+        val today = Calendar.getInstance().apply { set(2025, Calendar.JANUARY, 1) }
+        val mlk = HolidayRepository.nextFloatingHolidays(today)
+            .first { it.name == "Martin Luther King Jr. Day" }
+        assertEquals(2025, mlk.year)
+        assertEquals(20, mlk.day)
+    }
+
+    @Test
+    fun nextFloatingHolidays_bumpsToNextYearWhenDateHasPassed() {
+        // Jan 21 2025 — MLK Day (Jan 20) has already passed
+        val today = Calendar.getInstance().apply { set(2025, Calendar.JANUARY, 21) }
+        val mlk = HolidayRepository.nextFloatingHolidays(today)
+            .first { it.name == "Martin Luther King Jr. Day" }
+        assertEquals(2026, mlk.year)
+        assertEquals(19, mlk.day) // 3rd Monday of January 2026
+    }
+
+    @Test
+    fun nextFloatingHolidays_eachHolidayIsOneTime() {
+        val today = Calendar.getInstance().apply { set(2025, Calendar.JANUARY, 1) }
+        HolidayRepository.nextFloatingHolidays(today).forEach {
+            assertEquals(HolidayType.ONE_TIME, it.type)
+        }
+    }
 }
