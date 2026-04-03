@@ -25,4 +25,7 @@ interface AlarmDao {
 
     @Query("UPDATE alarms SET enabled = :enabled WHERE id = :id")
     suspend fun setEnabled(id: Long, enabled: Boolean)
+
+    @Query("UPDATE alarms SET snoozeCount = :count WHERE id = :id")
+    suspend fun setSnoozeCount(id: Long, count: Int)
 }

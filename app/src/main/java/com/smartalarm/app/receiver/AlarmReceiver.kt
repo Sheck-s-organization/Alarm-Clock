@@ -3,8 +3,13 @@ package com.smartalarm.app.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.smartalarm.app.AlarmApplication
 import com.smartalarm.app.service.AlarmService
 import com.smartalarm.app.util.LogBuffer
+import com.smartalarm.app.util.WorkDayChecker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AlarmReceiver : BroadcastReceiver() {
 
@@ -16,8 +21,33 @@ class AlarmReceiver : BroadcastReceiver() {
             LogBuffer.e(TAG, "Received intent with invalid alarm id ($rawId) — dropped")
             return
         }
-        LogBuffer.d(TAG, "Alarm $alarmId triggered — starting AlarmService")
-        AlarmService.start(context, alarmId)
+
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val app = context.applicationContext as AlarmApplication
+                val alarm = app.repository.getById(alarmId)
+                if (alarm == null) {
+                    LogBuffer.e(TAG, "Alarm $alarmId not found in DB — dropped")
+                    return@launch
+                }
+
+                val workSchedule = alarm.workScheduleId?.let {
+                    app.workScheduleRepository.getById(it)
+                }
+                val holidays = app.holidayRepository.getAllNow()
+
+                if (!WorkDayChecker.shouldFire(workSchedule, holidays)) {
+                    LogBuffer.d(TAG, "Alarm $alarmId skipped — not a work day or is a holiday")
+                    return@launch
+                }
+
+                LogBuffer.d(TAG, "Alarm $alarmId triggered — starting AlarmService")
+                AlarmService.start(context, alarmId)
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     companion object {

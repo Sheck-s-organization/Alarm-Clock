@@ -40,6 +40,14 @@
             android:exported="false" />
 
         <receiver
+            android:name=".receiver.SnoozeReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receiver.DismissReceiver"
+            android:exported="false" />
+
+        <receiver
             android:name=".receiver.BootReceiver"
             android:exported="true">
             <intent-filter>
