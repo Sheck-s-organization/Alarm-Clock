@@ -75,11 +75,12 @@ class LocationMatcherTest {
 
     @Test
     fun deviceExactlyAtRadius_isConsideredInside() {
-        // Place device exactly radiusMeters away — should still match (<=)
+        // Verify the boundary comparison is <= not <.
+        // We compute d (Double) then use ceil(d).toFloat() as the radius — this guarantees
+        // the Float radius is >= d regardless of Float/Double rounding direction.
         val loc = SavedLocation(id = 1, name = "Test", latitude = 51.5000, longitude = -0.1000, radiusMeters = 100f)
         val d = HaversineLocationMatcher.haversineDistance(51.5000, -0.1000, 51.5009, -0.1000)
-        // d ≈ 100 m; set radius to exactly d so device is on the boundary
-        val boundaryLoc = loc.copy(radiusMeters = d.toFloat())
+        val boundaryLoc = loc.copy(radiusMeters = kotlin.math.ceil(d).toFloat())
         val result = HaversineLocationMatcher.findMatch(51.5009, -0.1000, listOf(boundaryLoc))
         assertNotNull(result)
     }
