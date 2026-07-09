@@ -14,7 +14,7 @@ interface AddressResolver {
 class GeocoderAddressResolver(private val context: Context) : AddressResolver {
 
     override suspend fun resolve(query: String): GeoPoint? = withContext(Dispatchers.IO) {
-        if (!Geocoder.isPresent) return@withContext null
+        if (!Geocoder.isPresent()) return@withContext null
         try {
             @Suppress("DEPRECATION")
             Geocoder(context).getFromLocationName(query, 1)
