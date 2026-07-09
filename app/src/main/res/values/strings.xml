@@ -38,4 +38,16 @@
 
     <string name="next_firing_prefix">Next: %1$s</string>
     <string name="next_firing_none">Not scheduled</string>
+
+    <string name="skip_on_days_off_short">Skips days off</string>
+    <string name="only_at_location_short">Near place</string>
+    <string name="repeats_annually_suffix">(annual)</string>
+
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+    <string name="day_sun">Sun</string>
 </resources>
