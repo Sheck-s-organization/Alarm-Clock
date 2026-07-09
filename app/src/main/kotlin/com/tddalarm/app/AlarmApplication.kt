@@ -7,9 +7,13 @@ import android.content.Context
 import com.tddalarm.app.data.db.AppDatabase
 import com.tddalarm.app.data.repo.AlarmRepository
 import com.tddalarm.app.data.repo.AlarmStore
+import com.tddalarm.app.data.repo.PlaceRepository
+import com.tddalarm.app.data.repo.PlaceStore
 import com.tddalarm.app.data.repo.WorkCalendarRepository
 import com.tddalarm.app.data.repo.WorkCalendarStore
+import com.tddalarm.app.location.AddressResolver
 import com.tddalarm.app.location.FusedLocationProvider
+import com.tddalarm.app.location.GeocoderAddressResolver
 import com.tddalarm.app.location.LocationProvider
 import com.tddalarm.app.scheduling.AndroidAlarmScheduler
 import com.tddalarm.app.scheduling.HandleAlarmTrigger
@@ -49,10 +53,12 @@ class AlarmApplication : Application() {
 class AppContainer(context: Context) {
     private val db = AppDatabase.get(context)
 
-    val alarmStore: AlarmStore = AlarmRepository(db.alarmDao())
+    val alarmStore: AlarmStore = AlarmRepository(db.alarmDao(), db.savedLocationDao())
+    val placeStore: PlaceStore = PlaceRepository(db.savedLocationDao())
     val calendarStore: WorkCalendarStore = WorkCalendarRepository(db.workCalendarDao())
     val scheduler: AndroidAlarmScheduler = AndroidAlarmScheduler(context)
     val locationProvider: LocationProvider = FusedLocationProvider(context)
+    val addressResolver: AddressResolver = GeocoderAddressResolver(context)
     val handleAlarmTrigger: HandleAlarmTrigger =
         HandleAlarmTrigger(alarmStore, calendarStore, locationProvider, scheduler)
 }

@@ -3,6 +3,7 @@ package com.tddalarm.app.data
 import com.tddalarm.app.data.entity.AlarmEntity
 import com.tddalarm.app.data.entity.HolidayEntity
 import com.tddalarm.app.data.entity.PtoPeriodEntity
+import com.tddalarm.app.data.entity.SavedLocationEntity
 import com.tddalarm.app.data.entity.WorkScheduleEntity
 import com.tddalarm.core.alarm.Alarm
 import com.tddalarm.core.alarm.LocationRule
@@ -19,46 +20,72 @@ import java.time.Month
 
 class MappersTest {
 
+    private val homeEntity = SavedLocationEntity(
+        id = 7, name = "Home",
+        latitude = 39.768403, longitude = -86.158068, radiusMeters = 25_000.0,
+    )
+    private val placesById = mapOf(homeEntity.id to homeEntity)
+
     @Test
-    fun `alarm with all rules round-trips through its entity`() {
+    fun `saved location entity round-trips through its domain place`() {
+        val place = homeEntity.toDomain()
+        assertEquals("Home", place.name)
+        assertEquals(GeoPoint(39.768403, -86.158068), place.fence.center)
+        assertEquals(25_000.0, place.fence.radiusMeters, 0.0)
+        assertEquals(homeEntity, place.toEntity())
+    }
+
+    @Test
+    fun `alarm referencing a saved place resolves its fence from the place`() {
         val alarm = Alarm(
-            id = 7,
+            id = 2,
             label = "Church",
             hour = 8,
             minute = 15,
-            repeatDays = setOf(DayOfWeek.SUNDAY, DayOfWeek.WEDNESDAY),
-            enabled = true,
-            skipOnDaysOff = true,
+            repeatDays = setOf(DayOfWeek.SUNDAY),
+            skipOnDaysOff = false,
             locationRule = LocationRule(
                 fence = GeoFence(GeoPoint(39.768403, -86.158068), 25_000.0),
                 fireWhenLocationUnknown = false,
+                placeId = 7,
             ),
         )
-        assertEquals(alarm, alarm.toEntity().toDomain())
+        val entity = alarm.toEntity()
+        assertEquals(7L, entity.locationPlaceId)
+        assertEquals(alarm, entity.toDomain(placesById))
+    }
+
+    @Test
+    fun `alarm whose saved place was deleted loses its location rule`() {
+        val entity = AlarmEntity(
+            id = 3, label = "Church", hour = 8, minute = 0, repeatDays = "SUNDAY",
+            enabled = true, skipOnDaysOff = false,
+            locationPlaceId = 99, fireWhenLocationUnknown = true,
+        )
+        assertNull(entity.toDomain(placesById).locationRule)
+    }
+
+    @Test
+    fun `alarm without a place reference has no location rule`() {
+        val entity = AlarmEntity(
+            id = 3, label = "Work", hour = 6, minute = 30, repeatDays = "",
+            enabled = true, skipOnDaysOff = true,
+            locationPlaceId = null, fireWhenLocationUnknown = true,
+        )
+        assertNull(entity.toDomain(placesById).locationRule)
     }
 
     @Test
     fun `plain alarm without rules round-trips`() {
         val alarm = Alarm(id = 1, label = "", hour = 6, minute = 30)
-        assertEquals(alarm, alarm.toEntity().toDomain())
+        assertEquals(alarm, alarm.toEntity().toDomain(placesById))
     }
 
     @Test
     fun `empty repeat days map to empty string and back`() {
         val entity = Alarm(id = 1, label = "x", hour = 6, minute = 0).toEntity()
         assertEquals("", entity.repeatDays)
-        assertEquals(emptySet<DayOfWeek>(), entity.toDomain().repeatDays)
-    }
-
-    @Test
-    fun `entity without location columns maps to null location rule`() {
-        val entity = AlarmEntity(
-            id = 3, label = "Work", hour = 6, minute = 30, repeatDays = "",
-            enabled = true, skipOnDaysOff = true,
-            locationLatitude = null, locationLongitude = null, locationRadiusMeters = null,
-            fireWhenLocationUnknown = true,
-        )
-        assertNull(entity.toDomain().locationRule)
+        assertEquals(emptySet<DayOfWeek>(), entity.toDomain(placesById).repeatDays)
     }
 
     @Test

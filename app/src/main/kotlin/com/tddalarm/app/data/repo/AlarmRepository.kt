@@ -1,18 +1,27 @@
 package com.tddalarm.app.data.repo
 
 import com.tddalarm.app.data.dao.AlarmDao
+import com.tddalarm.app.data.dao.SavedLocationDao
+import com.tddalarm.app.data.entity.SavedLocationEntity
 import com.tddalarm.app.data.toDomain
 import com.tddalarm.app.data.toEntity
 import com.tddalarm.core.alarm.Alarm
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
-class AlarmRepository(private val dao: AlarmDao) : AlarmStore {
+class AlarmRepository(
+    private val dao: AlarmDao,
+    private val locationDao: SavedLocationDao,
+) : AlarmStore {
 
     override val alarms: Flow<List<Alarm>> =
-        dao.all().map { entities -> entities.map { it.toDomain() } }
+        combine(dao.all(), locationDao.all()) { entities, places ->
+            val placesById = places.associateBy(SavedLocationEntity::id)
+            entities.map { it.toDomain(placesById) }
+        }
 
-    override suspend fun getById(id: Long): Alarm? = dao.byId(id)?.toDomain()
+    override suspend fun getById(id: Long): Alarm? =
+        dao.byId(id)?.toDomain(placesByIdOnce())
 
     override suspend fun save(alarm: Alarm): Long {
         val rowId = dao.upsert(alarm.toEntity())
@@ -23,5 +32,11 @@ class AlarmRepository(private val dao: AlarmDao) : AlarmStore {
 
     override suspend fun setEnabled(id: Long, enabled: Boolean) = dao.setEnabled(id, enabled)
 
-    override suspend fun enabledAlarms(): List<Alarm> = dao.enabledOnce().map { it.toDomain() }
+    override suspend fun enabledAlarms(): List<Alarm> {
+        val placesById = placesByIdOnce()
+        return dao.enabledOnce().map { it.toDomain(placesById) }
+    }
+
+    private suspend fun placesByIdOnce(): Map<Long, SavedLocationEntity> =
+        locationDao.allOnce().associateBy(SavedLocationEntity::id)
 }

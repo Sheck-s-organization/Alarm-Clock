@@ -7,10 +7,13 @@ import java.time.DayOfWeek
  * Restricts an alarm to a place: it only fires when the device is inside [fence].
  * [fireWhenLocationUnknown] decides the fail-safe when no location is available —
  * the default is to fire rather than silently stay quiet.
+ * [placeId] identifies the saved place the fence was resolved from, when there is one,
+ * so persistence can store a reference instead of raw coordinates.
  */
 data class LocationRule(
     val fence: GeoFence,
     val fireWhenLocationUnknown: Boolean = true,
+    val placeId: Long? = null,
 )
 
 /**

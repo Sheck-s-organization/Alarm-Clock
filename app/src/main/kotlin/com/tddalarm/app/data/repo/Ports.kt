@@ -1,6 +1,7 @@
 package com.tddalarm.app.data.repo
 
 import com.tddalarm.app.data.HolidayEntry
+import com.tddalarm.app.data.Place
 import com.tddalarm.app.data.PtoEntry
 import com.tddalarm.core.alarm.Alarm
 import com.tddalarm.core.schedule.DateRange
@@ -17,6 +18,14 @@ interface AlarmStore {
     suspend fun delete(id: Long)
     suspend fun setEnabled(id: Long, enabled: Boolean)
     suspend fun enabledAlarms(): List<Alarm>
+}
+
+/** Persistence port for saved places alarms can be restricted to. */
+interface PlaceStore {
+    val places: Flow<List<Place>>
+    suspend fun getById(id: Long): Place?
+    suspend fun save(place: Place): Long
+    suspend fun delete(id: Long)
 }
 
 /** Persistence port for the work calendar (schedule + PTO + holidays). */

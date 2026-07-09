@@ -13,10 +13,18 @@ data class AlarmEntity(
     val repeatDays: String,
     val enabled: Boolean,
     val skipOnDaysOff: Boolean,
-    val locationLatitude: Double?,
-    val locationLongitude: Double?,
-    val locationRadiusMeters: Double?,
+    /** References [SavedLocationEntity.id]; null when the alarm has no location rule. */
+    val locationPlaceId: Long?,
     val fireWhenLocationUnknown: Boolean,
+)
+
+@Entity(tableName = "saved_locations")
+data class SavedLocationEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeters: Double,
 )
 
 @Entity(tableName = "work_schedule")
