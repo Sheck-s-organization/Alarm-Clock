@@ -1,0 +1,27 @@
+plugins {
+    kotlin("jvm") version "1.9.22"
+}
+
+group = "com.tddalarm"
+version = "1.0"
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+}
+
+tasks.test {
+    testLogging {
+        events("passed", "failed", "skipped")
+    }
+}
