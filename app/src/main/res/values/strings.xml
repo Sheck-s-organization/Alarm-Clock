@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">TDD Alarm Clock</string>
+
+    <string name="alarms_title">Alarms</string>
+    <string name="no_alarms_yet">No alarms yet.\nTap + to add one.</string>
+    <string name="add_alarm">Add alarm</string>
+    <string name="edit_alarm">Edit alarm</string>
+    <string name="label_hint">Label</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+
+    <string name="skip_on_days_off">Skip on days off (PTO, holidays, non-working days)</string>
+    <string name="only_at_location">Only ring near a saved place</string>
+    <string name="latitude_hint">Latitude</string>
+    <string name="longitude_hint">Longitude</string>
+    <string name="radius_hint">Radius (km)</string>
+    <string name="use_current_location">Use current location</string>
+    <string name="fire_when_location_unknown">Ring anyway if location is unknown</string>
+    <string name="location_unavailable">Current location unavailable</string>
+
+    <string name="work_schedule_title">Work schedule</string>
+    <string name="working_days_header">Working days</string>
+    <string name="pto_header">PTO / vacation</string>
+    <string name="add_pto">Add PTO period</string>
+    <string name="holidays_header">Holidays</string>
+    <string name="add_holiday">Add holiday</string>
+    <string name="holiday_name_hint">Holiday name</string>
+    <string name="repeats_annually">Repeats every year</string>
+    <string name="pick_start_date">Pick start date</string>
+    <string name="pick_end_date">Pick end date</string>
+    <string name="pick_date">Pick date</string>
+
+    <string name="alarm_notification_channel">Alarms</string>
+    <string name="alarm_firing_title">Alarm</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="snooze">Snooze</string>
+
+    <string name="next_firing_prefix">Next: %1$s</string>
+    <string name="next_firing_none">Not scheduled</string>
+</resources>
