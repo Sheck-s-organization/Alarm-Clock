@@ -36,6 +36,7 @@
             android:exported="false"
             android:launchMode="singleInstance"
             android:showWhenLocked="true"
+            android:theme="@style/Theme.TddAlarmClock.Firing"
             android:turnScreenOn="true" />
 
         <service
