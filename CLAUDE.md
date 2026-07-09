@@ -4,8 +4,11 @@
 
 A personalised Android alarm clock built strictly test-first. Alarms can be:
 1. **Work-schedule aware** (`skipOnDaysOff`): silent on non-working days, PTO, holidays.
-2. **Location aware** (`locationRule`): only rings inside a geo-fence (e.g. near home for
-   the Sunday church alarm), with a per-alarm fail-safe when location is unknown.
+2. **Location aware** (`locationRule`): only rings inside the geo-fence of a saved place
+   (e.g. near Home for the Sunday church alarm), with a per-alarm fail-safe when location
+   is unknown. Places live in their own table (`SavedLocationEntity`) and are created by
+   street address (`AddressResolver`/`Geocoder`) or current location; alarms reference
+   them by `placeId` and the repository resolves the fence when loading.
 
 ## Build & test environment
 
@@ -42,8 +45,8 @@ app/src/main/kotlin/com/tddalarm/app/
   data/       entities, DAOs, AppDatabase, Mappers, repo/ (ports + Room impls)
   scheduling/ AndroidAlarmScheduler, HandleAlarmTrigger, AlarmReceiver, BootReceiver
   firing/     AlarmRingService, AlarmFiringActivity, Dismiss/SnoozeReceiver
-  location/   LocationProvider (port), FusedLocationProvider
-  ui/         MainActivity, ViewModels + factory, alarms/, schedule/
+  location/   LocationProvider + AddressResolver (ports), Fused/Geocoder impls
+  ui/         MainActivity, ViewModels + factory, alarms/, schedule/, locations/
 ```
 
 Ports (`AlarmStore`, `WorkCalendarStore`, `AlarmSchedulerPort`, `LocationProvider`)

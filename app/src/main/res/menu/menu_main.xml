@@ -4,4 +4,8 @@
         android:id="@+id/action_work_schedule"
         android:showAsAction="never"
         android:title="@string/work_schedule_title" />
+    <item
+        android:id="@+id/action_locations"
+        android:showAsAction="never"
+        android:title="@string/saved_places_title" />
 </menu>

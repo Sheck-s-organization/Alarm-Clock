@@ -12,12 +12,18 @@
 
     <string name="skip_on_days_off">Skip on days off (PTO, holidays, non-working days)</string>
     <string name="only_at_location">Only ring near a saved place</string>
-    <string name="latitude_hint">Latitude</string>
-    <string name="longitude_hint">Longitude</string>
     <string name="radius_hint">Radius (km)</string>
-    <string name="use_current_location">Use current location</string>
     <string name="fire_when_location_unknown">Ring anyway if location is unknown</string>
     <string name="location_unavailable">Current location unavailable</string>
+
+    <string name="saved_places_title">Saved places</string>
+    <string name="add_place">Add place</string>
+    <string name="place_name_hint">Name (e.g. Home)</string>
+    <string name="address_hint">Address (leave blank to use current location)</string>
+    <string name="place_name_required">Enter a name for the place</string>
+    <string name="address_not_found">Couldn\'t find that address</string>
+    <string name="no_places_yet">No saved places yet — add one under menu → Saved places</string>
+    <string name="near_place">Near %1$s</string>
 
     <string name="work_schedule_title">Work schedule</string>
     <string name="working_days_header">Working days</string>

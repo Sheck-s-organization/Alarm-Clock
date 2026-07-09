@@ -41,7 +41,13 @@ class AlarmAdapter(
             val ruleParts = buildList {
                 if (alarm.repeatDays.isNotEmpty()) add(alarm.repeatDays.toShortNames())
                 if (alarm.skipOnDaysOff) add(context.getString(R.string.skip_on_days_off_short))
-                if (alarm.locationRule != null) add(context.getString(R.string.only_at_location_short))
+                if (alarm.locationRule != null) {
+                    add(
+                        item.placeName
+                            ?.let { context.getString(R.string.near_place, it) }
+                            ?: context.getString(R.string.only_at_location_short)
+                    )
+                }
             }
             rulesText.text = ruleParts.joinToString(" · ")
             rulesText.isVisible = ruleParts.isNotEmpty()

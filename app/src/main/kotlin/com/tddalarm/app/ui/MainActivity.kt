@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import com.tddalarm.app.R
 import com.tddalarm.app.ui.alarms.AlarmsFragment
+import com.tddalarm.app.ui.locations.LocationsFragment
 import com.tddalarm.app.ui.schedule.WorkScheduleFragment
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +41,13 @@ class MainActivity : AppCompatActivity() {
         R.id.action_work_schedule -> {
             supportFragmentManager.commit {
                 replace(R.id.fragmentContainer, WorkScheduleFragment())
+                addToBackStack(null)
+            }
+            true
+        }
+        R.id.action_locations -> {
+            supportFragmentManager.commit {
+                replace(R.id.fragmentContainer, LocationsFragment())
                 addToBackStack(null)
             }
             true

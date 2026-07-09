@@ -2,7 +2,7 @@ package com.tddalarm.app.ui.alarms
 
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.Toast
+import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -11,15 +11,15 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tddalarm.app.AlarmApplication
 import com.tddalarm.app.R
+import com.tddalarm.app.data.Place
 import com.tddalarm.app.data.daysFromStorageString
 import com.tddalarm.app.data.toStorageString
 import com.tddalarm.app.databinding.DialogAlarmEditBinding
 import com.tddalarm.app.ui.AlarmListViewModel
+import com.tddalarm.app.ui.LocationsViewModel
 import com.tddalarm.app.ui.ViewModelFactory
 import com.tddalarm.core.alarm.Alarm
 import com.tddalarm.core.alarm.LocationRule
-import com.tddalarm.core.geo.GeoFence
-import com.tddalarm.core.geo.GeoPoint
 import java.time.DayOfWeek
 import kotlinx.coroutines.launch
 
@@ -28,6 +28,12 @@ class AlarmEditDialogFragment : DialogFragment() {
     private val viewModel: AlarmListViewModel by activityViewModels {
         ViewModelFactory(AlarmApplication.from(requireContext()).container)
     }
+
+    private val locationsViewModel: LocationsViewModel by activityViewModels {
+        ViewModelFactory(AlarmApplication.from(requireContext()).container)
+    }
+
+    private var availablePlaces: List<Place> = emptyList()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val binding = DialogAlarmEditBinding.inflate(layoutInflater)
@@ -53,29 +59,29 @@ class AlarmEditDialogFragment : DialogFragment() {
         val repeatDays = daysFromStorageString(args.getString(ARG_REPEAT_DAYS).orEmpty())
         dayChips.forEach { (day, chip) -> chip.isChecked = day in repeatDays }
 
-        val hasLocation = args.getBoolean(ARG_HAS_LOCATION)
-        binding.locationSwitch.isChecked = hasLocation
-        binding.locationFields.isVisible = hasLocation
-        if (hasLocation) {
-            binding.latitudeInput.setText(args.getDouble(ARG_LATITUDE).toString())
-            binding.longitudeInput.setText(args.getDouble(ARG_LONGITUDE).toString())
-            binding.radiusInput.setText((args.getDouble(ARG_RADIUS_METERS) / 1000.0).toString())
-        }
+        val initialPlaceId = args.getLong(ARG_PLACE_ID, NO_PLACE)
+        binding.locationSwitch.isChecked = initialPlaceId != NO_PLACE
+        binding.locationFields.isVisible = initialPlaceId != NO_PLACE
         binding.fireWhenUnknownSwitch.isChecked = args.getBoolean(ARG_FIRE_WHEN_UNKNOWN, true)
         binding.locationSwitch.setOnCheckedChangeListener { _, checked ->
             binding.locationFields.isVisible = checked
         }
 
-        binding.useCurrentLocationButton.setOnClickListener {
-            val provider = AlarmApplication.from(requireContext()).container.locationProvider
-            lifecycleScope.launch {
-                val point = provider.lastKnown()
-                if (point == null) {
-                    Toast.makeText(context, R.string.location_unavailable, Toast.LENGTH_SHORT).show()
-                } else {
-                    binding.latitudeInput.setText(point.latitude.toString())
-                    binding.longitudeInput.setText(point.longitude.toString())
-                }
+        lifecycleScope.launch {
+            locationsViewModel.items.collect { places ->
+                availablePlaces = places
+                binding.noPlacesHint.isVisible = places.isEmpty()
+                binding.placeSpinner.isVisible = places.isNotEmpty()
+                val selected = binding.placeSpinner.selectedItemPosition
+                    .takeIf { it in places.indices }
+                binding.placeSpinner.adapter = ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_dropdown_item,
+                    places.map { it.name },
+                )
+                val restoreIndex = selected
+                    ?: places.indexOfFirst { it.id == initialPlaceId }.takeIf { it >= 0 }
+                if (restoreIndex != null) binding.placeSpinner.setSelection(restoreIndex)
             }
         }
 
@@ -112,16 +118,11 @@ class AlarmEditDialogFragment : DialogFragment() {
 
     private fun buildLocationRule(binding: DialogAlarmEditBinding): LocationRule? {
         if (!binding.locationSwitch.isChecked) return null
-        val lat = binding.latitudeInput.text.toString().toDoubleOrNull()
-        val lng = binding.longitudeInput.text.toString().toDoubleOrNull()
-        val radiusKm = binding.radiusInput.text.toString().toDoubleOrNull()
-        if (lat == null || lng == null || radiusKm == null || radiusKm <= 0) {
-            Toast.makeText(context, R.string.location_unavailable, Toast.LENGTH_SHORT).show()
-            return null
-        }
+        val place = availablePlaces.getOrNull(binding.placeSpinner.selectedItemPosition) ?: return null
         return LocationRule(
-            fence = GeoFence(GeoPoint(lat, lng), radiusKm * 1000.0),
+            fence = place.fence,
             fireWhenLocationUnknown = binding.fireWhenUnknownSwitch.isChecked,
+            placeId = place.id,
         )
     }
 
@@ -133,11 +134,9 @@ class AlarmEditDialogFragment : DialogFragment() {
         private const val ARG_REPEAT_DAYS = "repeat_days"
         private const val ARG_ENABLED = "enabled"
         private const val ARG_SKIP_DAYS_OFF = "skip_days_off"
-        private const val ARG_HAS_LOCATION = "has_location"
-        private const val ARG_LATITUDE = "latitude"
-        private const val ARG_LONGITUDE = "longitude"
-        private const val ARG_RADIUS_METERS = "radius_meters"
+        private const val ARG_PLACE_ID = "place_id"
         private const val ARG_FIRE_WHEN_UNKNOWN = "fire_when_unknown"
+        private const val NO_PLACE = -1L
 
         fun forNewAlarm(): AlarmEditDialogFragment = AlarmEditDialogFragment().apply {
             arguments = bundleOf(ARG_ID to 0L, ARG_HOUR to 7, ARG_MINUTE to 0)
@@ -152,10 +151,7 @@ class AlarmEditDialogFragment : DialogFragment() {
                 ARG_REPEAT_DAYS to alarm.repeatDays.toStorageString(),
                 ARG_ENABLED to alarm.enabled,
                 ARG_SKIP_DAYS_OFF to alarm.skipOnDaysOff,
-                ARG_HAS_LOCATION to (alarm.locationRule != null),
-                ARG_LATITUDE to (alarm.locationRule?.fence?.center?.latitude ?: 0.0),
-                ARG_LONGITUDE to (alarm.locationRule?.fence?.center?.longitude ?: 0.0),
-                ARG_RADIUS_METERS to (alarm.locationRule?.fence?.radiusMeters ?: 0.0),
+                ARG_PLACE_ID to (alarm.locationRule?.placeId ?: NO_PLACE),
                 ARG_FIRE_WHEN_UNKNOWN to (alarm.locationRule?.fireWhenLocationUnknown ?: true),
             )
         }

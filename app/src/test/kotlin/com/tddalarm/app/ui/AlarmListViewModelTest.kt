@@ -1,9 +1,14 @@
 package com.tddalarm.app.ui
 
 import com.tddalarm.app.FakeAlarmStore
+import com.tddalarm.app.FakePlaceStore
 import com.tddalarm.app.FakeScheduler
 import com.tddalarm.app.FakeWorkCalendarStore
+import com.tddalarm.app.data.Place
 import com.tddalarm.core.alarm.Alarm
+import com.tddalarm.core.alarm.LocationRule
+import com.tddalarm.core.geo.GeoFence
+import com.tddalarm.core.geo.GeoPoint
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -26,6 +31,7 @@ class AlarmListViewModelTest {
 
     private val alarms = FakeAlarmStore()
     private val calendarStore = FakeWorkCalendarStore()
+    private val places = FakePlaceStore()
     private val scheduler = FakeScheduler()
 
     // Friday 2026-07-10, 20:00.
@@ -34,7 +40,7 @@ class AlarmListViewModelTest {
         ZoneId.of("UTC"),
     )
 
-    private fun viewModel() = AlarmListViewModel(alarms, calendarStore, scheduler, clock)
+    private fun viewModel() = AlarmListViewModel(alarms, calendarStore, places, scheduler, clock)
 
     @Test
     fun `saving a new alarm stores it and schedules its next trigger`() = runTest {
@@ -98,6 +104,28 @@ class AlarmListViewModelTest {
 
         val item = vm.items.value.single()
         assertEquals(LocalDateTime.of(2026, 7, 13, 6, 30), item.nextFiring) // Monday
+        collector.cancel()
+    }
+
+    @Test
+    fun `list items expose the saved place name for location-restricted alarms`() = runTest {
+        val fence = GeoFence(GeoPoint(39.768403, -86.158068), 25_000.0)
+        val placeId = places.save(Place(0, "Home", fence))
+        alarms.save(
+            Alarm(
+                label = "Church", hour = 8, minute = 0,
+                locationRule = LocationRule(fence, placeId = placeId),
+            )
+        )
+        alarms.save(Alarm(label = "Work", hour = 6, minute = 30))
+        val vm = viewModel()
+
+        val collector = launch { vm.items.collect {} }
+        advanceUntilIdle()
+
+        val byLabel = vm.items.value.associateBy { it.alarm.label }
+        assertEquals("Home", byLabel.getValue("Church").placeName)
+        assertEquals(null, byLabel.getValue("Work").placeName)
         collector.cancel()
     }
 }

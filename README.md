@@ -4,9 +4,12 @@ An Android alarm clock, built test-first, whose alarms know when *not* to ring:
 
 - **Work-schedule aware** — a "skip on days off" alarm stays silent on non-working days,
   during PTO periods, and on holidays (one-time or annual).
-- **Location aware** — an alarm can be restricted to a place ("only ring within 25 km of
-  home"), so the Sunday church alarm doesn't wake you when you're out of town. If the
-  device location is unknown, the alarm fail-safes to ringing (configurable per alarm).
+- **Location aware** — an alarm can be restricted to a saved place ("only ring within
+  25 km of Home"), so the Sunday church alarm doesn't wake you when you're out of town.
+  Places are managed on their own screen, entered by street address (geocoded on-device
+  via `Geocoder`) or from the current location, and referenced by any number of alarms.
+  If the device location is unknown at ring time, the alarm fail-safes to ringing
+  (configurable per alarm).
 - **Reliable** — exact scheduling via `AlarmManager.setAlarmClock`, re-registration after
   reboot, foreground ringing service, full-screen dismiss/snooze over the lock screen.
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tddalarm.app.data.repo.AlarmSchedulerPort
 import com.tddalarm.app.data.repo.AlarmStore
+import com.tddalarm.app.data.repo.PlaceStore
 import com.tddalarm.app.data.repo.WorkCalendarStore
 import com.tddalarm.core.alarm.Alarm
 import com.tddalarm.core.alarm.NextTriggerCalculator
@@ -19,23 +20,28 @@ data class AlarmListItem(
     val alarm: Alarm,
     /** When the alarm is actually expected to ring next; null when never/disabled. */
     val nextFiring: LocalDateTime?,
+    /** Name of the saved place the alarm is restricted to, when it has one. */
+    val placeName: String? = null,
 )
 
 class AlarmListViewModel(
     private val alarms: AlarmStore,
     calendarStore: WorkCalendarStore,
+    placeStore: PlaceStore,
     private val scheduler: AlarmSchedulerPort,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
 
     val items: StateFlow<List<AlarmListItem>> =
-        combine(alarms.alarms, calendarStore.calendar) { list, calendar ->
+        combine(alarms.alarms, calendarStore.calendar, placeStore.places) { list, calendar, places ->
+            val placeNames = places.associate { it.id to it.name }
             list.map { alarm ->
                 AlarmListItem(
                     alarm = alarm,
                     nextFiring = NextTriggerCalculator.nextExpectedFiring(
                         alarm, LocalDateTime.now(clock), calendar,
                     ),
+                    placeName = alarm.locationRule?.placeId?.let(placeNames::get),
                 )
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

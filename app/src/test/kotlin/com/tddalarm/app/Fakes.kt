@@ -1,10 +1,13 @@
 package com.tddalarm.app
 
 import com.tddalarm.app.data.HolidayEntry
+import com.tddalarm.app.data.Place
 import com.tddalarm.app.data.PtoEntry
 import com.tddalarm.app.data.repo.AlarmSchedulerPort
 import com.tddalarm.app.data.repo.AlarmStore
+import com.tddalarm.app.data.repo.PlaceStore
 import com.tddalarm.app.data.repo.WorkCalendarStore
+import com.tddalarm.app.location.AddressResolver
 import com.tddalarm.app.location.LocationProvider
 import com.tddalarm.core.alarm.Alarm
 import com.tddalarm.core.geo.GeoPoint
@@ -97,6 +100,31 @@ class FakeScheduler : AlarmSchedulerPort {
     override fun cancel(alarmId: Long) {
         cancelled += alarmId
     }
+}
+
+class FakePlaceStore : PlaceStore {
+    private val state = MutableStateFlow<List<Place>>(emptyList())
+    private var nextId = 1L
+
+    override val places = state
+
+    override suspend fun getById(id: Long): Place? = state.value.find { it.id == id }
+
+    override suspend fun save(place: Place): Long {
+        val stored = if (place.id == 0L) place.copy(id = nextId++) else place
+        state.value = state.value.filter { it.id != stored.id } + stored
+        return stored.id
+    }
+
+    override suspend fun delete(id: Long) {
+        state.value = state.value.filter { it.id != id }
+    }
+}
+
+class FakeAddressResolver(
+    private val known: Map<String, GeoPoint> = emptyMap(),
+) : AddressResolver {
+    override suspend fun resolve(query: String): GeoPoint? = known[query]
 }
 
 class FakeLocationProvider(var location: GeoPoint? = null) : LocationProvider {
