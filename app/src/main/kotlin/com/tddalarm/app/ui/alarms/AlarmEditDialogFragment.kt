@@ -1,6 +1,7 @@
 package com.tddalarm.app.ui.alarms
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import androidx.core.os.bundleOf
@@ -8,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tddalarm.app.AlarmApplication
 import com.tddalarm.app.R
@@ -16,6 +18,7 @@ import com.tddalarm.app.data.daysFromStorageString
 import com.tddalarm.app.data.toStorageString
 import com.tddalarm.app.databinding.DialogAlarmEditBinding
 import com.tddalarm.app.ui.AlarmListViewModel
+import com.tddalarm.app.ui.EditorResult
 import com.tddalarm.app.ui.LocationsViewModel
 import com.tddalarm.app.ui.ViewModelFactory
 import com.tddalarm.core.alarm.Alarm
@@ -35,8 +38,14 @@ class AlarmEditDialogFragment : DialogFragment() {
 
     private var availablePlaces: List<Place> = emptyList()
 
+    private var binding: DialogAlarmEditBinding? = null
+    private var dayChips: Map<DayOfWeek, Chip> = emptyMap()
+
+    /** Set when a button already decided the outcome, so onDismiss doesn't auto-save. */
+    private var closeHandled = false
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val binding = DialogAlarmEditBinding.inflate(layoutInflater)
+        val binding = DialogAlarmEditBinding.inflate(layoutInflater).also { this.binding = it }
         val args = requireArguments()
         val alarmId = args.getLong(ARG_ID)
         val isNew = alarmId == 0L
@@ -47,7 +56,7 @@ class AlarmEditDialogFragment : DialogFragment() {
         binding.labelInput.setText(args.getString(ARG_LABEL).orEmpty())
         binding.skipDaysOffSwitch.isChecked = args.getBoolean(ARG_SKIP_DAYS_OFF)
 
-        val dayChips = mapOf(
+        dayChips = mapOf(
             DayOfWeek.MONDAY to binding.chipMon,
             DayOfWeek.TUESDAY to binding.chipTue,
             DayOfWeek.WEDNESDAY to binding.chipWed,
@@ -88,33 +97,49 @@ class AlarmEditDialogFragment : DialogFragment() {
         val builder = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (isNew) R.string.add_alarm else R.string.edit_alarm)
             .setView(binding.root)
-            .setPositiveButton(R.string.save) { _, _ ->
-                viewModel.save(buildAlarm(binding, alarmId, dayChips, enabled = args.getBoolean(ARG_ENABLED, true)))
-            }
-            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.save) { _, _ -> close(EditorResult.SAVE) }
+            .setNegativeButton(R.string.cancel) { _, _ -> close(EditorResult.CANCEL) }
         if (!isNew) {
-            builder.setNeutralButton(R.string.delete) { _, _ ->
-                viewModel.delete(buildAlarm(binding, alarmId, dayChips, enabled = false))
-            }
+            builder.setNeutralButton(R.string.delete) { _, _ -> close(EditorResult.DELETE) }
         }
         return builder.create()
     }
 
-    private fun buildAlarm(
-        binding: DialogAlarmEditBinding,
-        alarmId: Long,
-        dayChips: Map<DayOfWeek, com.google.android.material.chip.Chip>,
-        enabled: Boolean,
-    ): Alarm = Alarm(
-        id = alarmId,
-        label = binding.labelInput.text.toString().trim(),
-        hour = binding.timePicker.hour,
-        minute = binding.timePicker.minute,
-        repeatDays = dayChips.filterValues { it.isChecked }.keys,
-        enabled = enabled,
-        skipOnDaysOff = binding.skipDaysOffSwitch.isChecked,
-        locationRule = buildLocationRule(binding),
-    )
+    /**
+     * Clicking off the dialog (tap outside / Back) saves the draft instead of
+     * discarding it — an alarm the user set but forgot to save must still ring.
+     * Only the explicit Cancel button discards.
+     */
+    override fun onDismiss(dialog: DialogInterface) {
+        if (!closeHandled && activity?.isChangingConfigurations != true) {
+            close(EditorResult.DISMISS)
+        }
+        super.onDismiss(dialog)
+    }
+
+    override fun onDestroyView() {
+        binding = null
+        dayChips = emptyMap()
+        super.onDestroyView()
+    }
+
+    private fun close(result: EditorResult) {
+        if (closeHandled) return
+        closeHandled = true
+        val binding = this.binding ?: return
+        val args = requireArguments()
+        val draft = Alarm(
+            id = args.getLong(ARG_ID),
+            label = binding.labelInput.text.toString().trim(),
+            hour = binding.timePicker.hour,
+            minute = binding.timePicker.minute,
+            repeatDays = dayChips.filterValues { it.isChecked }.keys,
+            enabled = args.getBoolean(ARG_ENABLED, true),
+            skipOnDaysOff = binding.skipDaysOffSwitch.isChecked,
+            locationRule = buildLocationRule(binding),
+        )
+        viewModel.onEditorClosed(draft, result)
+    }
 
     private fun buildLocationRule(binding: DialogAlarmEditBinding): LocationRule? {
         if (!binding.locationSwitch.isChecked) return null

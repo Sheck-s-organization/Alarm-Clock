@@ -16,6 +16,24 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+/** How the alarm editor was closed. */
+enum class EditorResult {
+    /** Explicit Save button. */
+    SAVE,
+
+    /** Explicit Cancel button — the only way to discard edits. */
+    CANCEL,
+
+    /**
+     * Clicked off (tap outside / Back). Treated as save: a set alarm that was
+     * never explicitly saved must still wake the user up.
+     */
+    DISMISS,
+
+    /** Explicit Delete button. */
+    DELETE,
+}
+
 data class AlarmListItem(
     val alarm: Alarm,
     /** When the alarm is actually expected to ring next; null when never/disabled. */
@@ -45,6 +63,14 @@ class AlarmListViewModel(
                 )
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun onEditorClosed(draft: Alarm, result: EditorResult) {
+        when (result) {
+            EditorResult.SAVE, EditorResult.DISMISS -> save(draft)
+            EditorResult.CANCEL -> Unit
+            EditorResult.DELETE -> delete(draft)
+        }
+    }
 
     fun save(alarm: Alarm) {
         viewModelScope.launch {

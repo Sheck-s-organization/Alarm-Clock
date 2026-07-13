@@ -54,6 +54,8 @@ boundaries, unknown-location fail-safes, and combined work+location rules.
 | Church alarm, location unknown | rings (default, per-alarm configurable) |
 | Any repeating alarm after a skipped day | automatically scheduled for its next day |
 | Device reboot | all enabled alarms re-registered |
+| Editor closed by tapping outside / Back | draft is saved and scheduled (never silently lost) |
+| Editor closed via Cancel button | edits discarded — the only discard path |
 
 ## Toolchain
 

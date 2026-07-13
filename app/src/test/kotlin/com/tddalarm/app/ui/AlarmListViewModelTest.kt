@@ -107,6 +107,63 @@ class AlarmListViewModelTest {
         collector.cancel()
     }
 
+    // --- editor close behaviour: clicking off saves, only Cancel discards ---
+
+    @Test
+    fun `dismissing the editor by clicking off saves the draft like Save would`() = runTest {
+        val vm = viewModel()
+        vm.onEditorClosed(Alarm(label = "Forgot to save", hour = 5, minute = 45), EditorResult.DISMISS)
+        advanceUntilIdle()
+
+        assertEquals("Forgot to save", alarms.enabledAlarms().single().label)
+        assertEquals("Forgot to save", scheduler.scheduled.single().label)
+    }
+
+    @Test
+    fun `cancelling the editor saves and schedules nothing`() = runTest {
+        val vm = viewModel()
+        vm.onEditorClosed(Alarm(label = "Discarded", hour = 5, minute = 45), EditorResult.CANCEL)
+        advanceUntilIdle()
+
+        assertTrue(alarms.enabledAlarms().isEmpty())
+        assertTrue(scheduler.scheduled.isEmpty())
+        assertTrue(scheduler.cancelled.isEmpty())
+    }
+
+    @Test
+    fun `cancelling the editor leaves an existing alarm untouched`() = runTest {
+        val id = alarms.save(Alarm(label = "Original", hour = 6, minute = 30))
+        val vm = viewModel()
+        val edited = requireNotNull(alarms.getById(id)).copy(label = "Edited", hour = 9)
+
+        vm.onEditorClosed(edited, EditorResult.CANCEL)
+        advanceUntilIdle()
+
+        assertEquals("Original", alarms.getById(id)?.label)
+        assertEquals(6, alarms.getById(id)?.hour)
+    }
+
+    @Test
+    fun `closing the editor with Save saves the draft`() = runTest {
+        val vm = viewModel()
+        vm.onEditorClosed(Alarm(label = "Explicit", hour = 7, minute = 0), EditorResult.SAVE)
+        advanceUntilIdle()
+
+        assertEquals("Explicit", alarms.enabledAlarms().single().label)
+    }
+
+    @Test
+    fun `closing the editor with Delete removes the alarm and cancels its trigger`() = runTest {
+        val id = alarms.save(Alarm(label = "Old", hour = 6, minute = 30))
+        val vm = viewModel()
+
+        vm.onEditorClosed(requireNotNull(alarms.getById(id)), EditorResult.DELETE)
+        advanceUntilIdle()
+
+        assertTrue(alarms.enabledAlarms().isEmpty())
+        assertEquals(listOf(id), scheduler.cancelled)
+    }
+
     @Test
     fun `list items expose the saved place name for location-restricted alarms`() = runTest {
         val fence = GeoFence(GeoPoint(39.768403, -86.158068), 25_000.0)
